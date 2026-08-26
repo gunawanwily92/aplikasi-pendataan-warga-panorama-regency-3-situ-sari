@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "HouseUnit": {
+      "title": "HouseUnit",
+      "description": "Data unit rumah dan daftar anggota keluarga warga aktif Blok D",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nomorRumah": { "type": "string" },
+        "blok": { "type": "string" },
+        "nomorUrut": { "type": "number" },
+        "statusHunian": { "type": "string" },
+        "kepemilikan": { "type": "string" },
+        "nomorKk": { "type": "string" },
+        "fotoKkUrl": { "type": "string" },
+        "catatanKhusus": { "type": "string" },
+        "wifi": { "type": "string" },
+        "residents": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "nomorRumah", "blok", "statusHunian", "kepemilikan", "residents"]
+    },
+    "RondaSchedule": {
+      "title": "RondaSchedule",
+      "description": "Jadwal dan daftar petugas ronda malam pos kamling",
+      "type": "object",
+      "properties": {
+        "hari": { "type": "string" },
+        "ketuaRegu": { "type": "string" },
+        "posJaga": { "type": "string" },
+        "jamMulai": { "type": "string" },
+        "jamSelesai": { "type": "string" },
+        "petugas": { "type": "array" }
+      },
+      "required": ["hari", "ketuaRegu", "posJaga", "petugas"]
+    },
+    "MovedCitizen": {
+      "title": "MovedCitizen",
+      "description": "Catatan mutasi warga pindah domisili keluar",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nama": { "type": "string" },
+        "nik": { "type": "string" },
+        "alamatLama": { "type": "string" },
+        "alamatTujuan": { "type": "string" },
+        "tanggalPindah": { "type": "string" }
+      },
+      "required": ["id", "nama", "alamatLama", "alamatTujuan"]
+    },
+    "DeceasedCitizen": {
+      "title": "DeceasedCitizen",
+      "description": "Catatan data warga meninggal dunia",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nama": { "type": "string" },
+        "nik": { "type": "string" },
+        "alamatRumah": { "type": "string" },
+        "tanggalMeninggal": { "type": "string" }
+      },
+      "required": ["id", "nama", "alamatRumah", "tanggalMeninggal"]
+    },
+    "CoverLetter": {
+      "title": "CoverLetter",
+      "description": "Arsip agenda surat pengantar resmi RT",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nomorSurat": { "type": "string" },
+        "tanggalSurat": { "type": "string" },
+        "keperluan": { "type": "string" }
+      },
+      "required": ["id", "nomorSurat", "tanggalSurat", "keperluan"]
+    }
+  },
+  "firestore": {
+    "houses": {
+      "entity": "HouseUnit",
+      "description": "Koleksi data rumah dan sensus warga aktif Blok D"
+    },
+    "ronda_schedules": {
+      "entity": "RondaSchedule",
+      "description": "Koleksi jadwal siskamling ronda perumahan"
+    },
+    "moved_citizens": {
+      "entity": "MovedCitizen",
+      "description": "Koleksi data warga pindah"
+    },
+    "deceased_citizens": {
+      "entity": "DeceasedCitizen",
+      "description": "Koleksi data warga meninggal"
+    },
+    "cover_letters": {
+      "entity": "CoverLetter",
+      "description": "Koleksi arsip surat pengantar RT"
+    }
+  }
+}

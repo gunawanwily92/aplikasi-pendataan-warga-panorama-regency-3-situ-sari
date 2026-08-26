@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#46C6FE" />
+      <stop offset="20%" stop-color="#24B7F9" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="78%" stop-color="#1E40AF" />
+      <stop offset="100%" stop-color="#4F46E5" />
+    </linearGradient>
+    <linearGradient id="ribbonTop" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="55%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </linearGradient>
+    <linearGradient id="dArc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="50%" stop-color="#1D4ED8" />
+      <stop offset="100%" stop-color="#1E40AF" />
+    </linearGradient>
+    <linearGradient id="ribbonBottom" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#1E40AF" />
+    </linearGradient>
+    <linearGradient id="innerCore" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0056B3" />
+      <stop offset="100%" stop-color="#00357A" />
+    </linearGradient>
+    <linearGradient id="lowerFold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#004DA8" />
+      <stop offset="100%" stop-color="#00357A" />
+    </linearGradient>
+  </defs>
+  <rect x="14" y="14" width="484" height="484" rx="116" fill="url(#bgGradient)" />
+  <rect x="52" y="52" width="408" height="408" rx="88" fill="none" stroke="#FFFFFF" stroke-width="32" />
+  <rect x="68" y="68" width="376" height="376" rx="72" fill="#FFFFFF" />
+  <g id="logo-d-ribbon">
+    <path d="M 260 65 C 375 65, 442 145, 442 256 C 442 367, 375 447, 260 447 C 345 405, 385 345, 385 256 C 385 167, 345 107, 260 65 Z" fill="url(#dArc)" />
+    <path d="M 76 182 C 76 112, 140 65, 260 65 C 335 65, 380 98, 410 148 C 365 110, 310 92, 255 92 C 165 92, 112 135, 112 182 L 76 182 Z" fill="url(#ribbonTop)" />
+    <path d="M 76 182 C 76 142, 108 112, 168 112 L 168 148 C 130 148, 112 162, 112 182 Z" fill="url(#innerCore)" />
+    <path d="M 76 330 C 76 400, 140 447, 260 447 C 335 447, 380 414, 410 364 C 365 402, 310 420, 255 420 C 165 420, 112 377, 112 330 L 76 330 Z" fill="url(#ribbonBottom)" />
+    <path d="M 76 330 C 76 370, 108 400, 168 400 L 168 364 C 130 364, 112 350, 112 330 Z" fill="url(#lowerFold)" />
+    <path d="M 168 148 L 168 215 C 168 225, 160 232, 150 232 L 76 232 L 76 182 C 76 142, 108 112, 168 112 L 168 148 Z" fill="#0058C6" />
+    <path d="M 168 364 L 168 297 C 168 287, 160 280, 150 280 L 76 280 L 76 330 C 76 370, 108 400, 168 400 L 168 364 Z" fill="#0066D6" />
+  </g>
+</svg>

@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 12mm 8mm 12mm;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box !important;
+    text-shadow: none !important;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    overflow: visible !important;
+  }
+
+  /* Hide screen controls, navigation, header, footer, and non-print UI */
+  aside, nav, header, footer, button, input, select, textarea, .print\:hidden, .no-print {
+    display: none !important;
+  }
+
+  /* Reset all fixed backdrops and overlays during print */
+  .fixed, [role="dialog"], .backdrop-blur-sm, .animate-fadeIn {
+    position: static !important;
+    inset: auto !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+    display: block !important;
+  }
+
+  /* Reset modal containers */
+  .max-w-2xl, .max-w-3xl, .max-w-4xl, .max-w-5xl, .max-w-7xl, .rounded-2xl, .rounded-xl {
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .overflow-y-auto, .overflow-hidden {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* Target printable document containers to fit tightly into 1 page A4 */
+  #printable-citizen-card,
+  #printable-moved-letter,
+  #printable-deceased-letter,
+  #printable-cover-letter,
+  #printable-summary {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    break-inside: avoid !important;
+    break-after: avoid !important;
+    break-before: avoid !important;
+    overflow: visible !important;
+  }
+
+  /* Ensure tables render cleanly with compact padding */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+
+  th, td {
+    border-color: #94a3b8 !important;
+  }
+}
+

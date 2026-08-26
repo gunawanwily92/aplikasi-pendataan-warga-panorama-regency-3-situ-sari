@@ -1,0 +1,166 @@
+import { HouseUnit, RondaSchedule, MovedCitizen, DeceasedCitizen, CoverLetter } from '../types/census';
+
+/**
+ * Mendeteksi apakah format nomor rumah adalah generic "Blok D" lama (bukan Blok D1, D2, D3, D4 resmi).
+ */
+export function isGenericBlokD(nomorRumah?: string, id?: string): boolean {
+  const str = (nomorRumah || id || '').trim();
+  if (!str) return false;
+  // Jika memuat D1, D2, D3, atau D4 (contoh: "Blok D1 No. 01", "D1-01", "Blok D2", dsb), itu data resmi valid
+  if (/(?:Blok\s*)?D[1-4]\b/i.test(str) || /^D[1-4]-/i.test(str)) {
+    return false;
+  }
+  // Jika hanya berlabel "Blok D No. xx", "Blok D xx", atau "D-xx", ini adalah data generic lama
+  if (/^Blok\s*D\b/i.test(str) || /^D-\d+/i.test(str)) {
+    return true;
+  }
+  return false;
+}
+
+// Data warga sensus aktif dimulai kosong atau hanya unit Blok D1-D4 resmi
+export const INITIAL_HOUSES: HouseUnit[] = [];
+
+export const INITIAL_RONDA_SCHEDULE: RondaSchedule[] = [
+  
+];
+
+const STORAGE_KEY = 'panorama_regency3_blok_d_sensus_v1';
+const RONDA_STORAGE_KEY = 'panorama_regency3_blok_d_ronda_v1';
+
+export function loadHousesFromStorage(): HouseUnit[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        // Hapus & filter data warga generic Blok D serta rumah yang memiliki 0 jiwa
+        return parsed.filter((h: HouseUnit) => !isGenericBlokD(h?.nomorRumah, h?.id) && Boolean(h?.residents && h.residents.length > 0));
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load houses from localStorage', e);
+  }
+  return INITIAL_HOUSES.filter((h) => !isGenericBlokD(h?.nomorRumah, h?.id) && Boolean(h?.residents && h.residents.length > 0));
+}
+
+export function saveHousesToStorage(houses: HouseUnit[]): void {
+  try {
+    // Pastikan tidak menyimpan data generic Blok D dan data dengan 0 jiwa
+    const cleanHouses = houses.filter((h) => !isGenericBlokD(h?.nomorRumah, h?.id) && Boolean(h?.residents && h.residents.length > 0));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanHouses));
+  } catch (e) {
+    console.error('Failed to save houses to localStorage', e);
+  }
+}
+
+export function loadRondaFromStorage(): RondaSchedule[] {
+  try {
+    const saved = localStorage.getItem(RONDA_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load ronda from localStorage', e);
+  }
+  return INITIAL_RONDA_SCHEDULE;
+}
+
+export function saveRondaToStorage(schedules: RondaSchedule[]): void {
+  try {
+    localStorage.setItem(RONDA_STORAGE_KEY, JSON.stringify(schedules));
+  } catch (e) {
+    console.error('Failed to save ronda to localStorage', e);
+  }
+}
+
+export const MOVED_STORAGE_KEY = 'PR3_CENSUS_MOVED_CITIZENS_V1';
+export const DECEASED_STORAGE_KEY = 'PR3_CENSUS_DECEASED_CITIZENS_V1';
+
+export const INITIAL_MOVED_CITIZENS: MovedCitizen[] = [
+  
+];
+
+export const INITIAL_DECEASED_CITIZENS: DeceasedCitizen[] = [
+  
+];
+
+export function loadMovedFromStorage(): MovedCitizen[] {
+  try {
+    const saved = localStorage.getItem(MOVED_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((m: MovedCitizen) => !isGenericBlokD(m?.nomorRumahAsal));
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load moved citizens from localStorage', e);
+  }
+  return INITIAL_MOVED_CITIZENS;
+}
+
+export function saveMovedToStorage(data: MovedCitizen[]): void {
+  try {
+    const clean = data.filter((m) => !isGenericBlokD(m?.nomorRumahAsal));
+    localStorage.setItem(MOVED_STORAGE_KEY, JSON.stringify(clean));
+  } catch (e) {
+    console.error('Failed to save moved citizens to localStorage', e);
+  }
+}
+
+export function loadDeceasedFromStorage(): DeceasedCitizen[] {
+  try {
+    const saved = localStorage.getItem(DECEASED_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((d: DeceasedCitizen) => !isGenericBlokD(d?.nomorRumah));
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load deceased citizens from localStorage', e);
+  }
+  return INITIAL_DECEASED_CITIZENS;
+}
+
+export function saveDeceasedToStorage(data: DeceasedCitizen[]): void {
+  try {
+    const clean = data.filter((d) => !isGenericBlokD(d?.nomorRumah));
+    localStorage.setItem(DECEASED_STORAGE_KEY, JSON.stringify(clean));
+  } catch (e) {
+    console.error('Failed to save deceased citizens to localStorage', e);
+  }
+}
+
+export const COVER_LETTERS_STORAGE_KEY = 'PR3_CENSUS_COVER_LETTERS_V1';
+
+export const INITIAL_COVER_LETTERS: CoverLetter[] = [
+  
+];
+
+export function loadCoverLettersFromStorage(): CoverLetter[] {
+  try {
+    const saved = localStorage.getItem(COVER_LETTERS_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((l: CoverLetter) => !isGenericBlokD(l?.nomorRumah));
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load cover letters from localStorage', e);
+  }
+  return INITIAL_COVER_LETTERS;
+}
+
+export function saveCoverLettersToStorage(data: CoverLetter[]): void {
+  try {
+    const clean = data.filter((l) => !isGenericBlokD(l?.nomorRumah));
+    localStorage.setItem(COVER_LETTERS_STORAGE_KEY, JSON.stringify(clean));
+  } catch (e) {
+    console.error('Failed to save cover letters to localStorage', e);
+  }
+}
