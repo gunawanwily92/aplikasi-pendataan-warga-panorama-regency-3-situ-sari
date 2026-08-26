@@ -9,11 +9,12 @@ import {
   Unsubscribe
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { HouseUnit, RondaSchedule, MovedCitizen, DeceasedCitizen, CoverLetter } from '../types/census';
+import { HouseUnit, RondaSchedule, MovedCitizen, DeceasedCitizen, CoverLetter, RondaAttendance } from '../types/census';
 import { isGenericBlokD } from '../data/initialData';
 
 const HOUSES_COLL = 'houses';
 const RONDA_COLL = 'ronda_schedules';
+const RONDA_ATTENDANCE_COLL = 'ronda_attendance';
 const MOVED_COLL = 'moved_citizens';
 const DECEASED_COLL = 'deceased_citizens';
 const COVER_LETTERS_COLL = 'cover_letters';
@@ -156,6 +157,57 @@ export async function saveRondaToFirestore(schedules: RondaSchedule[]): Promise<
     batch.set(docRef, item, { merge: true });
   }
   await batch.commit();
+}
+
+/**
+ * Real-time listener untuk Presensi / Daftar Hadir Ronda
+ */
+export function subscribeRondaAttendance(
+  onData: (attendances: RondaAttendance[]) => void,
+  onError?: (err: Error) => void
+): Unsubscribe {
+  const collRef = collection(db, RONDA_ATTENDANCE_COLL);
+  return onSnapshot(
+    collRef,
+    (snapshot) => {
+      const items: RondaAttendance[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data() as RondaAttendance;
+        items.push({
+          ...data,
+          id: docSnap.id || data.id,
+        });
+      });
+      // Sort newest first
+      items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+      onData(items);
+    },
+    (error) => {
+      console.error('Error listening to Firestore ronda attendance:', error);
+      if (onError) onError(error);
+    }
+  );
+}
+
+/**
+ * Menyimpan presensi kehadiran ronda ke Firestore
+ */
+export async function saveRondaAttendanceToFirestore(attendance: RondaAttendance): Promise<void> {
+  if (!attendance.id) return;
+  const docRef = doc(db, RONDA_ATTENDANCE_COLL, attendance.id);
+  await setDoc(docRef, {
+    ...attendance,
+    createdAt: attendance.createdAt || new Date().toISOString(),
+  }, { merge: true });
+}
+
+/**
+ * Menghapus presensi kehadiran ronda
+ */
+export async function deleteRondaAttendanceFromFirestore(id: string): Promise<void> {
+  if (!id) return;
+  const docRef = doc(db, RONDA_ATTENDANCE_COLL, id);
+  await deleteDoc(docRef);
 }
 
 /**

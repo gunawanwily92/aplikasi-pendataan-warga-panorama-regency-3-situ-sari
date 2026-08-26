@@ -313,7 +313,7 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
       kotaTujuan: kotaTujuan.trim() || 'Luar Wilayah',
       alasanPindah,
       noHp: noHp.trim() || '-',
-      nomorSuratPindah: nomorSuratPindah.trim() || `471.2/${Math.floor(100 + Math.random() * 900)}/RT04-RW12/${new Date().getFullYear()}`,
+      nomorSuratPindah: nomorSuratPindah.trim() || `471.2/${Math.floor(100 + Math.random() * 900)}/RT05-RW05/${new Date().getFullYear()}`,
       keterangan: keterangan.trim(),
       petugasPencatat,
       updatedAt: nowISO,
@@ -445,7 +445,7 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
     return encodeURIComponent(
       `🚚 *PEMBERITAHUAN MUTASI PINDAH WARGA BLOK D*\n` +
       `🏘️ *Panorama Regency 3 Situ Sari*\n` +
-      `📍 _Wilayah Administrasi RT 004 / RW 012_\n\n` +
+      `📍 _Wilayah Administrasi Rt.005 Dan Rw.005_\n\n` +
       `Tercatat warga yang telah pindah domisili:\n` +
       `🏠 *Rumah Asal:* ${item.nomorRumahAsal}\n` +
       `📋 *No. KK:* ${item.nomorKK || '-'}\n` +
@@ -1404,7 +1404,7 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 text-sm sm:text-base">Surat Pengantar Pindah Domisili RT/RW</h3>
-                  <p className="text-[11px] text-slate-500">Pratinjau & Cetak Dokumen Resmi RT 004 / RW 012</p>
+                  <p className="text-[11px] text-slate-500">Pratinjau & Cetak Dokumen Resmi Rt.005 Dan Rw.005</p>
                 </div>
               </div>
 
@@ -1448,7 +1448,7 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
                     BLOK D
                   </div>
                   <div className="text-[11px] font-sans text-slate-600">
-                    Wilayah Administrasi: Rukun Tetangga (RT) 004 • Rukun Warga (RW) 012 • Kab. Bogor 16820
+                    Wilayah Administrasi: Rt.005 Dan Rw.005 • Kab. Bogor 16820
                   </div>
                 </div>
                 <div className="w-14 sm:w-16 hidden sm:block"></div>
@@ -1460,14 +1460,14 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
                   SURAT KETERANGAN PINDAH DOMISILI
                 </h2>
                 <div className="text-xs font-sans text-slate-600 font-mono">
-                  Nomor: {letterPrintItem.nomorSuratPindah || 'S-PNDH/BLOK-D/RT04-RW12/' + new Date().getFullYear()}
+                  Nomor: {letterPrintItem.nomorSuratPindah || 'S-PNDH/BLOK-D/RT05-RW05/' + new Date().getFullYear()}
                 </div>
               </div>
 
               {/* Body text */}
               <div className="space-y-3 print:space-y-2 text-xs font-sans text-slate-800 leading-normal print:leading-tight">
                 <p>
-                  Yang bertanda tangan di bawah ini Pengurus Blok D bersama Pengurus RT 004 dan RW 012 Perumahan Panorama Regency 3, Desa Situ Sari, Kecamatan Cileungsi, Kabupaten Bogor, menerangkan bahwa:
+                  Yang bertanda tangan di bawah ini Pengurus Blok D bersama Pengurus Rt.005 Dan Rw.005 Perumahan Panorama Regency 3, Desa Situ Sari, Kecamatan Cileungsi, Kabupaten Bogor, menerangkan bahwa:
                 </p>
 
                 <div className="pl-2 sm:pl-4 font-sans">
@@ -1501,7 +1501,7 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
                         <td className="w-48 sm:w-52 py-0.5 text-slate-700 align-top">Alamat Rumah Asal</td>
                         <td className="w-4 py-0.5 text-slate-900 align-top text-center font-bold">:</td>
                         <td className="py-0.5 font-medium text-slate-900 align-top">
-                          {letterPrintItem.nomorRumahAsal}, Wilayah RT 004 / RW 012 Panorama Regency 3, Situ Sari, Cileungsi
+                          {letterPrintItem.nomorRumahAsal}, Wilayah Rt.005 Dan Rw.005 Panorama Regency 3, Situ Sari, Cileungsi
                         </td>
                       </tr>
                       <tr>
@@ -1557,7 +1557,7 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
                 )}
 
                 <p className="pt-1 print:pt-0.5">
-                  Adalah benar yang bersangkutan tercatat pernah berdomisili di Blok D Perumahan Panorama Regency 3 (RT 004 / RW 012) dan telah mengajukan permohonan surat keterangan pindah. Sepanjang berada di lingkungan kami, yang bersangkutan berkelakuan baik.
+                  Adalah benar yang bersangkutan tercatat pernah berdomisili di Blok D Perumahan Panorama Regency 3 (Rt.005 Dan Rw.005) dan telah mengajukan permohonan surat keterangan pindah. Sepanjang berada di lingkungan kami, yang bersangkutan berkelakuan baik.
                 </p>
 
                 <p>
@@ -1574,7 +1574,7 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
               <div className="grid grid-cols-4 text-center text-xs font-sans text-slate-900 gap-2 pt-1 print:pt-0.5">
                 <div className="space-y-12 sm:space-y-14 print:space-y-10">
                   <div>
-                    <strong>Ketua RW 012</strong>
+                    <strong>Ketua RW 005</strong>
                   </div>
                   <div>
                     <div className="font-bold underline text-[11px]">
@@ -1585,7 +1585,7 @@ export const MovedCitizensView: React.FC<MovedCitizensViewProps> = ({
 
                 <div className="space-y-12 sm:space-y-14 print:space-y-10">
                   <div>
-                    <strong>Ketua RT 004</strong>
+                    <strong>Ketua RT 005</strong>
                   </div>
                   <div>
                     <div className="font-bold underline text-[11px]">

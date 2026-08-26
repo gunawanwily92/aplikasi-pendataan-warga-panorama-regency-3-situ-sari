@@ -242,7 +242,7 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
       namaPelapor: namaPelapor.trim(),
       hubunganPelapor: hubunganPelapor.trim(),
       noHpPelapor: noHpPelapor.trim() || '-',
-      nomorSuratKematian: nomorSuratKematian.trim() || `474.3/${Math.floor(100 + Math.random() * 900)}/RT04-RW12/${new Date().getFullYear()}`,
+      nomorSuratKematian: nomorSuratKematian.trim() || `474.3/${Math.floor(100 + Math.random() * 900)}/RT05-RW05/${new Date().getFullYear()}`,
       keterangan: keterangan.trim(),
       petugasPencatat,
       updatedAt: nowISO,
@@ -322,7 +322,7 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
     return encodeURIComponent(
       `🕊️ *BERITA DUKA CITA - WARGA BLOK D*\n` +
       `🏘️ *Panorama Regency 3 Situ Sari*\n` +
-      `📍 _Wilayah Administrasi RT 004 / RW 012_\n\n` +
+      `📍 _Wilayah Administrasi Rt.005 Dan Rw.005_\n\n` +
       `${greeting}\n\n` +
       `Telah berpulang ke Rahmatullah, tetangga/warga kita:\n` +
       `👤 *Nama:* *${item.nama}*\n` +
@@ -811,7 +811,7 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
                     {editingItem ? 'Edit Data Warga Meninggal' : 'Formulir Pencatatan Warga Meninggal Dunia'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Sistem Administrasi Kependudukan RT 004 / RW 012 Blok D
+                    Sistem Administrasi Kependudukan Rt.005 Dan Rw.005 Blok D
                   </p>
                 </div>
               </div>
@@ -1218,7 +1218,7 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 text-sm sm:text-base">Surat Keterangan Kematian RT/RW</h3>
-                  <p className="text-[11px] text-slate-500">Pratinjau & Cetak Dokumen Resmi RT 004 / RW 012</p>
+                  <p className="text-[11px] text-slate-500">Pratinjau & Cetak Dokumen Resmi Rt.005 Dan Rw.005</p>
                 </div>
               </div>
 
@@ -1262,7 +1262,7 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
                     BLOK D
                   </div>
                   <div className="text-[11px] font-sans text-slate-600">
-                    Wilayah Administrasi: Rukun Tetangga (RT) 004 • Rukun Warga (RW) 012 • Kab. Bogor 16820
+                    Wilayah Administrasi: Rt.005 Dan Rw.005 • Kab. Bogor 16820
                   </div>
                 </div>
                 <div className="w-14 sm:w-16 hidden sm:block"></div>
@@ -1274,14 +1274,14 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
                   SURAT KETERANGAN KEMATIAN
                 </h2>
                 <div className="text-xs font-sans text-slate-600 font-mono">
-                  Nomor: {letterPrintItem.nomorSuratKematian || 'S-KMTN/BLOK-D/RT04-RW12/' + new Date().getFullYear()}
+                  Nomor: {letterPrintItem.nomorSuratKematian || 'S-KMTN/BLOK-D/RT05-RW05/' + new Date().getFullYear()}
                 </div>
               </div>
 
               {/* Body text */}
               <div className="space-y-3 print:space-y-2 text-xs font-sans text-slate-800 leading-normal print:leading-tight">
                 <p>
-                  Yang bertanda tangan di bawah ini Pengurus Blok D bersama Pengurus RT 004 dan RW 012 Perumahan Panorama Regency 3, Desa Situ Sari, Kecamatan Cileungsi, Kabupaten Bogor, dengan ini menerangkan bahwa:
+                  Yang bertanda tangan di bawah ini Pengurus Blok D bersama Pengurus Rt.005 Dan Rw.005 Perumahan Panorama Regency 3, Desa Situ Sari, Kecamatan Cileungsi, Kabupaten Bogor, dengan ini menerangkan bahwa:
                 </p>
 
                 <div className="pl-2 sm:pl-4 font-sans">
@@ -1322,7 +1322,7 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
                         <td className="w-48 sm:w-52 py-0.5 text-slate-700 align-top">Alamat Rumah Duka</td>
                         <td className="w-4 py-0.5 text-slate-900 align-top text-center font-bold">:</td>
                         <td className="py-0.5 font-medium text-slate-900 align-top">
-                          {letterPrintItem.nomorRumah}, Wilayah RT 004 / RW 012 Panorama Regency 3, Situ Sari, Cileungsi
+                          {letterPrintItem.nomorRumah}, Wilayah Rt.005 Dan Rw.005 Panorama Regency 3, Situ Sari, Cileungsi
                         </td>
                       </tr>
                     </tbody>
@@ -1413,7 +1413,7 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
               <div className="grid grid-cols-4 text-center text-xs font-sans text-slate-900 gap-2 pt-1 print:pt-0.5">
                 <div className="space-y-12 sm:space-y-14 print:space-y-10">
                   <div>
-                    <strong>Ketua RW 012</strong>
+                    <strong>Ketua RW 005</strong>
                   </div>
                   <div>
                     <div className="font-bold underline text-[11px]">
@@ -1424,7 +1424,7 @@ export const DeceasedCitizensView: React.FC<DeceasedCitizensViewProps> = ({
 
                 <div className="space-y-12 sm:space-y-14 print:space-y-10">
                   <div>
-                    <strong>Ketua RT 004</strong>
+                    <strong>Ketua RT 005</strong>
                   </div>
                   <div>
                     <div className="font-bold underline text-[11px]">

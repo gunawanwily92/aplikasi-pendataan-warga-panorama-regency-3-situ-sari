@@ -39,8 +39,8 @@ export const CensusFormModal: React.FC<CensusFormModalProps> = ({
   const [nomorRumahManual, setNomorRumahManual] = useState<string>('1');
   const [nomorUrut, setNomorUrut] = useState<number>(1);
   const [nomorRumah, setNomorRumah] = useState<string>('Blok D1 No. 01');
-  const [rt, setRt] = useState<string>('004');
-  const [rw, setRw] = useState<string>('012');
+  const [rt, setRt] = useState<string>('005');
+  const [rw, setRw] = useState<string>('005');
   const [dusun, setDusun] = useState<string>('Situsari');
   const [perumahan, setPerumahan] = useState<string>('Panorama Regency 3');
   const [statusHunian, setStatusHunian] = useState<HouseOccupancyStatus>('tetap');
@@ -90,8 +90,8 @@ export const CensusFormModal: React.FC<CensusFormModalProps> = ({
       setSelectedBlok(blk as BlokName);
       setNomorRumahManual(num);
 
-      setRt(initialData.rt || '004');
-      setRw(initialData.rw || '012');
+      setRt(initialData.rt || '005');
+      setRw(initialData.rw || '005');
       setDusun(initialData.dusun || 'Situsari');
       setPerumahan(initialData.perumahan || 'Panorama Regency 3');
       setStatusHunian(initialData.statusHunian || 'tetap');
@@ -121,8 +121,8 @@ export const CensusFormModal: React.FC<CensusFormModalProps> = ({
       setSelectedBlok('D1');
       setNomorRumahManual(numStr);
       setNomorRumah(`Blok D1 No. ${numStr}`);
-      setRt('004');
-      setRw('012');
+      setRt('005');
+      setRw('005');
       setDusun('Situsari');
       setPerumahan('Panorama Regency 3');
       setStatusHunian('tetap');
@@ -1612,7 +1612,7 @@ export const CensusFormModal: React.FC<CensusFormModalProps> = ({
               <div className="bg-sky-50/80 p-4 rounded-2xl border border-sky-200 space-y-3">
                 <h4 className="font-bold text-sky-950 text-sm flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-sky-700" />
-                  Verifikasi Petugas Data RT 004 / RW 012 <span className="text-rose-600 font-bold">* (Wajib)</span>
+                  Verifikasi Petugas Data Rt.005 Dan Rw.005 <span className="text-rose-600 font-bold">* (Wajib)</span>
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

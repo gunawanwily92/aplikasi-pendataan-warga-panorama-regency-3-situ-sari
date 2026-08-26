@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HouseUnit, RondaSchedule, ActiveTab, AuthUser, MovedCitizen, DeceasedCitizen, CoverLetter } from './types/census';
+import { HouseUnit, RondaSchedule, ActiveTab, AuthUser, MovedCitizen, DeceasedCitizen, CoverLetter, RondaAttendance } from './types/census';
 import {
   INITIAL_HOUSES,
   INITIAL_RONDA_SCHEDULE,
@@ -37,6 +37,9 @@ import {
   saveCoverLetterToFirestore,
   deleteCoverLetterFromFirestore,
   syncAllCoverLettersToFirestore,
+  subscribeRondaAttendance,
+  saveRondaAttendanceToFirestore,
+  deleteRondaAttendanceFromFirestore,
   bootstrapFirestoreIfEmpty
 } from './services/firestoreService';
 import { Header } from './components/Header';
@@ -51,7 +54,8 @@ import { ExportPrintModal } from './components/ExportPrintModal';
 import { CensusFormModal } from './components/CensusFormModal';
 import { CitizenCardModal } from './components/CitizenCardModal';
 import { LoginScreen } from './components/LoginScreen';
-import { Home, Users, BarChart3, PlusCircle, LogOut, AlertTriangle, Building2, ShieldCheck, FileSpreadsheet, Truck, HeartCrack, FileText, BookOpen } from 'lucide-react';
+import { RondaSaturdayView } from './components/RondaSaturdayView';
+import { Home, Users, BarChart3, PlusCircle, LogOut, AlertTriangle, Building2, ShieldCheck, FileSpreadsheet, Truck, HeartCrack, FileText, BookOpen, Shield } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
@@ -71,9 +75,24 @@ export default function App() {
   const [movedList, setMovedList] = useState<MovedCitizen[]>(() => loadMovedFromStorage());
   const [deceasedList, setDeceasedList] = useState<DeceasedCitizen[]>(() => loadDeceasedFromStorage());
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>(() => loadCoverLettersFromStorage());
+  const [rondaAttendances, setRondaAttendances] = useState<RondaAttendance[]>([]);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const isGuest = currentUser?.isGuest || currentUser?.role === 'warga';
+  const isSaturday = new Date().getDay() === 6;
+
+  // Proteksi: Jika user adalah Warga dan mencoba membuka tab di luar Ringkasan (atau Ronda jika Sabtu), arahkan ke dashboard
+  useEffect(() => {
+    if (isGuest) {
+      if (activeTab === 'ronda' && isSaturday) {
+        // diperbolehkan
+      } else if (activeTab !== 'dashboard') {
+        setActiveTab('dashboard');
+      }
+    }
+  }, [isGuest, isSaturday, activeTab]);
 
   // Modals state
   const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
@@ -121,12 +140,17 @@ export default function App() {
       saveCoverLettersToStorage(firestoreLetters);
     });
 
+    const unsubAttendance = subscribeRondaAttendance((firestoreAttendance) => {
+      setRondaAttendances(firestoreAttendance);
+    });
+
     return () => {
       unsubHouses();
       unsubRonda();
       unsubMoved();
       unsubDeceased();
       unsubLetters();
+      unsubAttendance();
     };
   }, []);
 
@@ -290,6 +314,17 @@ export default function App() {
     deleteCoverLetterFromFirestore(letterId).catch(console.error);
   };
 
+  // Handlers for Presensi Ronda Sabtu
+  const handleAddRondaAttendance = (attendance: RondaAttendance) => {
+    setRondaAttendances((prev) => [attendance, ...prev]);
+    saveRondaAttendanceToFirestore(attendance).catch(console.error);
+  };
+
+  const handleDeleteRondaAttendance = (id: string) => {
+    setRondaAttendances((prev) => prev.filter((a) => a.id !== id));
+    deleteRondaAttendanceFromFirestore(id).catch(console.error);
+  };
+
   const handleImportData = (
     importedHouses: HouseUnit[],
     importedMoved?: MovedCitizen[],
@@ -347,7 +382,7 @@ export default function App() {
         searchQuery={searchQuery}
         setSearchQuery={(q) => {
           setSearchQuery(q);
-          if (q.trim() && activeTab !== 'warga') {
+          if (!isGuest && q.trim() && activeTab !== 'warga') {
             setActiveTab('warga');
           }
         }}
@@ -362,15 +397,38 @@ export default function App() {
             houses={houses}
             movedList={movedList}
             deceasedList={deceasedList}
+            currentUser={currentUser}
             onOpenAddModal={handleOpenAdd}
-            onNavigateTab={(tab) => setActiveTab(tab)}
-            onSelectHouse={(house) => {
-              setViewingCardHouse(house);
+            onNavigateTab={(tab) => {
+              if (isGuest && tab !== 'dashboard') {
+                if (tab === 'ronda' && isSaturday) {
+                  setActiveTab('ronda');
+                }
+                return;
+              }
+              setActiveTab(tab);
             }}
+            onSelectHouse={(house) => {
+              if (!isGuest) {
+                setViewingCardHouse(house);
+              }
+            }}
+            onOpenLoginModal={handleLogout}
           />
         )}
 
-        {activeTab === 'warga' && (
+        {/* Tab Ronda Khusus Hari Sabtu */}
+        {activeTab === 'ronda' && (
+          <RondaSaturdayView
+            currentUser={currentUser}
+            houses={houses}
+            attendances={rondaAttendances}
+            onAddAttendance={handleAddRondaAttendance}
+            onDeleteAttendance={handleDeleteRondaAttendance}
+          />
+        )}
+
+        {!isGuest && activeTab === 'warga' && (
           <CensusList
             houses={houses}
             searchQuery={searchQuery}
@@ -380,7 +438,7 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'pengantar' && (
+        {!isGuest && activeTab === 'pengantar' && (
           <CoverLetterView
             coverLetters={coverLetters}
             movedList={movedList}
@@ -393,7 +451,7 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'pindah' && (
+        {!isGuest && activeTab === 'pindah' && (
           <MovedCitizensView
             movedList={movedList}
             coverLetters={coverLetters}
@@ -406,7 +464,7 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'meninggal' && (
+        {!isGuest && activeTab === 'meninggal' && (
           <DeceasedCitizensView
             deceasedList={deceasedList}
             coverLetters={coverLetters}
@@ -419,7 +477,7 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'agenda' && (
+        {!isGuest && activeTab === 'agenda' && (
           <LetterAgendaView
             coverLetters={coverLetters}
             movedList={movedList}
@@ -430,7 +488,7 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'statistik' && (
+        {!isGuest && activeTab === 'statistik' && (
           <DemographicsStats
             houses={houses}
             movedList={movedList}
@@ -438,7 +496,7 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'ekspor' && (
+        {!isGuest && activeTab === 'ekspor' && (
           <ExportPrintModal
             houses={houses}
             rondaSchedule={rondaSchedule}
@@ -463,14 +521,14 @@ export default function App() {
             <span>•</span>
             <span className="text-emerald-600 font-medium flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Sesi Aktif: {currentUser.nama}
+              Sesi Aktif: {currentUser.nama} ({currentUser.jabatan})
             </span>
           </div>
         </div>
       </footer>
 
       {/* Mobile Responsive Navigation Bar for smaller browser screens */}
-      <nav aria-label="Navigasi Web Mobile" className="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 py-1.5 px-2 flex items-center justify-between shadow-xl overflow-x-auto no-scrollbar">
+      <nav aria-label="Navigasi Web Mobile" className="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 py-1.5 px-2 flex items-center justify-around shadow-xl overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('dashboard')}
           className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
@@ -478,68 +536,92 @@ export default function App() {
           }`}
         >
           <Home className="w-4 h-4" />
-          <span className="text-[9px]">Beranda</span>
+          <span className="text-[9px]">Ringkasan</span>
         </button>
 
-        <button
-          onClick={() => setActiveTab('warga')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
-            activeTab === 'warga' ? 'text-blue-600 font-bold' : 'text-slate-500 font-medium'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span className="text-[9px]">Warga</span>
-        </button>
+        {isSaturday && (
+          <button
+            onClick={() => setActiveTab('ronda')}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+              activeTab === 'ronda' ? 'text-emerald-600 font-bold' : 'text-slate-500 font-medium'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span className="text-[9px]">Ronda (Sabtu)</span>
+          </button>
+        )}
 
-        <button
-          onClick={() => setActiveTab('pengantar')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
-            activeTab === 'pengantar' ? 'text-blue-600 font-bold' : 'text-slate-500 font-medium'
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          <span className="text-[9px]">Pengantar</span>
-        </button>
+        {!isGuest ? (
+          <>
+            <button
+              onClick={() => setActiveTab('warga')}
+              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+                activeTab === 'warga' ? 'text-blue-600 font-bold' : 'text-slate-500 font-medium'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span className="text-[9px]">Warga</span>
+            </button>
 
-        <button
-          onClick={() => setActiveTab('pindah')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
-            activeTab === 'pindah' ? 'text-amber-600 font-bold' : 'text-slate-500 font-medium'
-          }`}
-        >
-          <Truck className="w-4 h-4" />
-          <span className="text-[9px]">Pindah</span>
-        </button>
+            <button
+              onClick={() => setActiveTab('pengantar')}
+              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+                activeTab === 'pengantar' ? 'text-blue-600 font-bold' : 'text-slate-500 font-medium'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span className="text-[9px]">Pengantar</span>
+            </button>
 
-        <button
-          onClick={() => setActiveTab('meninggal')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
-            activeTab === 'meninggal' ? 'text-rose-600 font-bold' : 'text-slate-500 font-medium'
-          }`}
-        >
-          <HeartCrack className="w-4 h-4" />
-          <span className="text-[9px]">Wafat</span>
-        </button>
+            <button
+              onClick={() => setActiveTab('pindah')}
+              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+                activeTab === 'pindah' ? 'text-amber-600 font-bold' : 'text-slate-500 font-medium'
+              }`}
+            >
+              <Truck className="w-4 h-4" />
+              <span className="text-[9px]">Pindah</span>
+            </button>
 
-        <button
-          onClick={() => setActiveTab('agenda')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
-            activeTab === 'agenda' ? 'text-indigo-600 font-bold' : 'text-slate-500 font-medium'
-          }`}
-        >
-          <BookOpen className="w-4 h-4" />
-          <span className="text-[9px]">Agenda</span>
-        </button>
+            <button
+              onClick={() => setActiveTab('meninggal')}
+              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+                activeTab === 'meninggal' ? 'text-rose-600 font-bold' : 'text-slate-500 font-medium'
+              }`}
+            >
+              <HeartCrack className="w-4 h-4" />
+              <span className="text-[9px]">Wafat</span>
+            </button>
 
-        <button
-          onClick={() => setActiveTab('statistik')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
-            activeTab === 'statistik' ? 'text-blue-600 font-bold' : 'text-slate-500 font-medium'
-          }`}
-        >
-          <BarChart3 className="w-4 h-4" />
-          <span className="text-[9px]">Demografi</span>
-        </button>
+            <button
+              onClick={() => setActiveTab('agenda')}
+              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+                activeTab === 'agenda' ? 'text-indigo-600 font-bold' : 'text-slate-500 font-medium'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="text-[9px]">Agenda</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('statistik')}
+              className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+                activeTab === 'statistik' ? 'text-blue-600 font-bold' : 'text-slate-500 font-medium'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span className="text-[9px]">Demografi</span>
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl text-slate-500 hover:text-blue-600 transition-all shrink-0 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-[9px]">Login Pengurus</span>
+          </button>
+        )}
       </nav>
 
       {/* Modal: Input / Edit Sensus */}

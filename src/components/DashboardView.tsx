@@ -1,5 +1,5 @@
 import React from 'react';
-import { HouseUnit, ActiveTab, MovedCitizen, DeceasedCitizen } from '../types/census';
+import { HouseUnit, ActiveTab, MovedCitizen, DeceasedCitizen, AuthUser } from '../types/census';
 import { getAllResidents, calculateAge } from '../utils/censusHelpers';
 import { TOTAL_OFFICIAL_HOUSES, BLOK_TOTAL_UNITS, BLOK_LIST } from '../data/masterHouseList';
 import {
@@ -27,25 +27,36 @@ import {
   FileText,
   GraduationCap,
   Droplet,
-  Wifi
+  Wifi,
+  Globe,
+  Lock,
+  PhoneCall,
+  Info,
+  Clock,
+  Shield
 } from 'lucide-react';
 
 interface DashboardViewProps {
   houses: HouseUnit[];
   movedList?: MovedCitizen[];
   deceasedList?: DeceasedCitizen[];
+  currentUser?: AuthUser | null;
   onOpenAddModal: () => void;
   onNavigateTab: (tab: ActiveTab) => void;
   onSelectHouse: (house: HouseUnit) => void;
+  onOpenLoginModal?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
   houses,
   movedList = [],
   deceasedList = [],
+  currentUser,
   onOpenAddModal,
   onNavigateTab,
+  onOpenLoginModal,
 }) => {
+  const isGuest = currentUser?.isGuest || currentUser?.role === 'warga';
   const allResidents = getAllResidents(houses);
   const totalJiwa = allResidents.length;
   const totalLaki = allResidents.filter((r) => r.resident.jenisKelamin === 'L').length;
@@ -174,13 +185,47 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
+      {/* Public Citizen Notice Banner */}
+      {isGuest && (
+        <div className="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white p-4 sm:p-5 rounded-2xl border border-emerald-500/40 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shrink-0">
+              <Globe className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm sm:text-base text-white">Ringkasan Publik Warga Blok D</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-slate-950 uppercase tracking-wide">
+                  Akses Terbuka
+                </span>
+              </div>
+              <p className="text-xs text-emerald-100/90 mt-0.5 leading-relaxed">
+                Menampilkan ringkasan kependudukan, statistik hunian, sarana wifi & sarana lingkungan Perumahan Panorama Regency 3 Blok D secara transparan.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {onOpenLoginModal && (
+              <button
+                onClick={onOpenLoginModal}
+                className="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Lock className="w-3.5 h-3.5 text-blue-600" />
+                <span>Login Pengurus RT</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Hero Welcome & Census Progress Banner */}
       <div className="bg-slate-900 text-white p-6 sm:p-7 rounded-2xl border border-slate-800 shadow-xl relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-2 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-xs font-semibold text-blue-300">
               <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              <span>Sistem Informasi Data & Kependudukan</span>
+              <span>Sistem Informasi Data & Kependudukan Lingkungan</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
               Panorama Regency 3 Situ Sari — Blok D
@@ -192,29 +237,59 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           {/* Quick Action Buttons */}
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button
-              onClick={onOpenAddModal}
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-950/40 transition-all cursor-pointer ring-1 ring-blue-500/50"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>+ Input Data Baru</span>
-            </button>
+            {isGuest ? (
+              <>
+                <button
+                  onClick={() => onNavigateTab('warga')}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-950/40 transition-all cursor-pointer ring-1 ring-blue-500/50"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Daftar Rumah & Warga</span>
+                </button>
 
-            <button
-              onClick={() => onNavigateTab('pengantar')}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-950/40 transition-all cursor-pointer ring-1 ring-emerald-500/50"
-            >
-              <FileText className="w-4 h-4" />
-              <span>+ Buat Surat Pengantar</span>
-            </button>
+                <button
+                  onClick={() => onNavigateTab('statistik')}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-950/40 transition-all cursor-pointer ring-1 ring-emerald-500/50"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Statistik Demografi</span>
+                </button>
 
-            <button
-              onClick={() => onNavigateTab('warga')}
-              className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-bold text-xs sm:text-sm rounded-xl border border-slate-700 transition-all cursor-pointer"
-            >
-              <Users className="w-4 h-4 text-blue-400" />
-              <span>Data Warga</span>
-            </button>
+                <button
+                  onClick={() => onNavigateTab('pengantar')}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-bold text-xs sm:text-sm rounded-xl border border-slate-700 transition-all cursor-pointer"
+                >
+                  <FileText className="w-4 h-4 text-emerald-400" />
+                  <span>Panduan Surat RT</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={onOpenAddModal}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-950/40 transition-all cursor-pointer ring-1 ring-blue-500/50"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>+ Input Data Baru</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigateTab('pengantar')}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-950/40 transition-all cursor-pointer ring-1 ring-emerald-500/50"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>+ Buat Surat Pengantar</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigateTab('warga')}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-bold text-xs sm:text-sm rounded-xl border border-slate-700 transition-all cursor-pointer"
+                >
+                  <Users className="w-4 h-4 text-blue-400" />
+                  <span>Data Warga</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -298,346 +373,242 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* 4 Main KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Total Jiwa */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-400 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Warga Aktif</span>
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold border border-blue-100">
-              <Users className="w-4 h-4" />
+      {/* Pusat Informasi & Panduan Layanan Warga */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white p-5 sm:p-6 rounded-2xl border border-slate-700/80 shadow-md space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700/80 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center font-bold">
+              <Info className="w-4 h-4 text-blue-400" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm sm:text-base text-white">
+                Pusat Informasi & Layanan Warga Blok D
+              </h3>
+              <p className="text-[11px] text-slate-300">
+                Panduan praktis administrasi RT, kontak pengurus, dan keamanan lingkungan
+              </p>
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{totalJiwa}</span>
-            <span className="text-xs text-slate-500 font-medium">Jiwa</span>
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-600 flex items-center gap-2">
-            <span className="text-blue-600 font-semibold">👦 {totalLaki} L</span>
-            <span className="text-slate-300">•</span>
-            <span className="text-pink-600 font-semibold">👧 {totalPerempuan} P</span>
-          </div>
+          <span className="text-[11px] px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-400/30 font-semibold self-start sm:self-auto">
+            Rt.005 Dan Rw.005 Panorama Regency 3
+          </span>
         </div>
 
-        {/* Total Rumah / KK */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-emerald-400 transition-all">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          {/* Card 1: Pengurusan Surat Pengantar */}
+          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5">
+            <div className="font-bold text-blue-300 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-blue-400 shrink-0" />
+              <span>Pengurusan Surat Pengantar RT</span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              Warga yang memerlukan Surat Pengantar RT (KTP/KK, SKCK, BPJS, Bank, SKU, Domisili, Nikah) dapat menghubungi Pengurus RT dengan melampirkan foto KTP & KK.
+            </p>
+            {!isGuest ? (
+              <button
+                onClick={() => onNavigateTab('pengantar')}
+                className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer pt-1"
+              >
+                <span>Kelola Surat Pengantar</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            ) : (
+              <div className="text-[11px] text-blue-300 pt-1 font-semibold">
+                Hubungi Sekertaris / Pengurus RT
+              </div>
+            )}
+          </div>
+
+          {/* Card 2: Jadwal Ronda & Keamanan */}
+          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5">
+            <div className="font-bold text-emerald-300 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Siskamling & Ronda Malam Minggu</span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              Kegiatan siskamling ronda malam warga berlangsung di Pos Kamling Utama Blok D pukul 22.00 s/d 04.00 WIB.
+            </p>
+            {new Date().getDay() === 6 ? (
+              <button
+                onClick={() => onNavigateTab('ronda')}
+                className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer pt-1"
+              >
+                <span>🚨 Buka Jadwal & Presensi Ronda Malam Ini</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            ) : (
+              <div className="text-[11px] text-slate-400 pt-1 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <span>Menu Ronda Aktif Khusus Hari Sabtu</span>
+              </div>
+            )}
+          </div>
+
+          {/* Card 3: Pelaporan Warga Baru / Pindah */}
+          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5">
+            <div className="font-bold text-amber-300 flex items-center gap-2">
+              <Truck className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>Lapor Warga Baru & Pindah</span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              Warga baru pindah masuk atau warga yang akan pindah domisili wajib melapor 1x24 jam kepada Ketua RT / Pengurus untuk sinkronisasi database kependudukan.
+            </p>
+            <div className="text-[11px] text-amber-300 pt-1 font-semibold">
+              Lapor ke Ketua Blok D / Korlap Wilayah
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main KPI Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Houses */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Unit Rumah</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold border border-emerald-100">
+            <span className="text-xs font-semibold text-slate-500">Unit Rumah</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
               <Home className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{totalHouses}</span>
-            <span className="text-xs text-slate-500 font-medium">Unit</span>
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-600 flex items-center gap-2">
-            <span className="text-emerald-700 font-semibold">✓ {occupiedHouses} Dihuni</span>
-            <span className="text-slate-300">•</span>
-            <span className="text-rose-600 font-semibold">{emptyHouses} Kosong</span>
+          <div className="mt-3">
+            <div className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-900">
+              {totalHouses}
+            </div>
+            <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
+              <span className="text-emerald-700 font-bold">{occupiedHouses} Dihuni</span>
+              <span>•</span>
+              <span className="text-rose-600 font-medium">{emptyHouses} Kosong</span>
+            </div>
           </div>
         </div>
 
-        {/* Total Warga Pindah */}
-        <div 
-          onClick={() => onNavigateTab('pindah')}
-          className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-amber-400 transition-all cursor-pointer group"
-        >
+        {/* Total Residents */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Warga Pindah</span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold border border-amber-100 group-hover:scale-105 transition-transform">
-              <Truck className="w-4 h-4" />
+            <span className="text-xs font-semibold text-slate-500">Total Warga (Jiwa)</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{totalJiwaPindah}</span>
-            <span className="text-xs text-slate-500 font-medium">Jiwa</span>
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-amber-800 font-semibold flex items-center justify-between">
-            <span>{totalBerkasPindah} Berkas Mutasi</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          <div className="mt-3">
+            <div className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-900">
+              {totalJiwa}
+            </div>
+            <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+              <span className="text-blue-700 font-semibold">{totalLaki} L</span>
+              <span>•</span>
+              <span className="text-pink-600 font-semibold">{totalPerempuan} P</span>
+            </div>
           </div>
         </div>
 
-        {/* Total Warga Wafat */}
-        <div 
-          onClick={() => onNavigateTab('meninggal')}
-          className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-rose-400 transition-all cursor-pointer group"
-        >
+        {/* Total Vehicles */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Warga Wafat</span>
-            <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold border border-rose-100 group-hover:scale-105 transition-transform">
-              <HeartCrack className="w-4 h-4" />
+            <span className="text-xs font-semibold text-slate-500">Total Kendaraan</span>
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+              <Car className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{totalJiwaMeninggal}</span>
-            <span className="text-xs text-slate-500 font-medium">Jiwa</span>
+          <div className="mt-3">
+            <div className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-900">
+              {totalMobil + totalMotor}
+            </div>
+            <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+              <span className="text-indigo-700 font-semibold">{totalMobil} Mobil</span>
+              <span>•</span>
+              <span className="text-slate-600 font-semibold">{totalMotor} Motor</span>
+            </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-rose-800 font-semibold flex items-center justify-between">
-            <span>Arsip Kematian RT</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+        </div>
+
+        {/* Status KTP Ratio */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500">Status KTP Warga</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+              <UserCheck className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-900">
+              {totalKtpBlokD}
+            </div>
+            <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+              <span className="text-amber-700 font-semibold">KTP Blok D ({totalJiwa > 0 ? Math.round((totalKtpBlokD / totalJiwa) * 100) : 0}%)</span>
+              <span>•</span>
+              <span className="text-slate-500">{totalKtpLuar} KTP Luar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Secondary Demographic Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center shrink-0">
+            <Baby className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-lg font-bold font-mono text-slate-900">{totalBalita}</div>
+            <div className="text-[11px] text-slate-500 font-medium">Balita / Anak (≤5 th)</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <HeartHandshake className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-lg font-bold font-mono text-slate-900">{totalLansia}</div>
+            <div className="text-[11px] text-slate-500 font-medium">Lansia (≥60 th)</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-lg font-bold font-mono text-slate-900">{totalBpjsAktif}</div>
+            <div className="text-[11px] text-slate-500 font-medium">BPJS Aktif</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <Home className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-lg font-bold font-mono text-slate-900">{totalMilikSendiri}</div>
+            <div className="text-[11px] text-slate-500 font-medium">Rumah Milik Sendiri</div>
           </div>
         </div>
       </div>
 
-      {/* ======================================================== */}
-      {/* SEKSI GRAFIK RINGKASAN WARGA PINDAH & WARGA MENINGGAL */}
-      {/* ======================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Grafik Warga Pindah */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
-                <Truck className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-slate-900">
-                  Grafik Ringkasan Warga Pindah Keluar
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  Distribusi mutasi warga keluar berdasarkan alasan ({totalJiwaPindah} Jiwa)
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => onNavigateTab('pindah')}
-              className="text-xs font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer"
-            >
-              <span>Kelola</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          {totalJiwaPindah === 0 ? (
-            <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 rounded-xl border border-slate-200">
-              Belum ada data warga pindah yang tercatat di sistem.
-            </div>
-          ) : (
-            <div className="space-y-3 pt-1 text-xs">
-              {sortedAlasanPindah.map(([alasan, count], idx) => {
-                const pct = totalJiwaPindah > 0 ? Math.round((count / totalJiwaPindah) * 100) : 0;
-                const colors = ['bg-amber-500', 'bg-blue-500', 'bg-emerald-500', 'bg-purple-500'];
-                const barColor = colors[idx % colors.length];
-
-                return (
-                  <div key={alasan} className="space-y-1">
-                    <div className="flex justify-between font-semibold text-slate-700">
-                      <span className="truncate max-w-[200px] sm:max-w-xs">{alasan}</span>
-                      <span className="font-mono text-slate-900 font-bold">{count} Jiwa ({pct}%)</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                      <div
-                        className={`${barColor} h-full rounded-full transition-all duration-500`}
-                        style={{ width: `${Math.max(5, pct)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                <span>Total berkas mutasi: <strong>{totalBerkasPindah} berkas</strong></span>
-                <span className="text-amber-700 font-semibold cursor-pointer" onClick={() => onNavigateTab('pindah')}>
-                  Lihat Arsip Surat Pindah →
-                </span>
-              </div>
-            </div>
-          )}
+      {/* Ringkasan Sarana & Fasilitas Lingkungan */}
+      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span className="font-bold text-slate-800">Sarana & Utilitas Lingkungan Blok D:</span>
         </div>
-
-        {/* Grafik Warga Meninggal */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center font-bold">
-                <HeartCrack className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-slate-900">
-                  Grafik Ringkasan Warga Meninggal Dunia
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  Distribusi penyebab kematian & usia ({totalJiwaMeninggal} Jiwa)
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => onNavigateTab('meninggal')}
-              className="text-xs font-bold text-rose-700 hover:text-rose-800 flex items-center gap-1 cursor-pointer"
-            >
-              <span>Kelola</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-
-          {totalJiwaMeninggal === 0 ? (
-            <div className="text-center py-8 text-xs text-slate-400 bg-slate-50 rounded-xl border border-slate-200">
-              Belum ada data warga wafat yang tercatat di sistem.
-            </div>
-          ) : (
-            <div className="space-y-3 pt-1 text-xs">
-              {sortedPenyebab.map(([penyebab, count], idx) => {
-                const pct = totalJiwaMeninggal > 0 ? Math.round((count / totalJiwaMeninggal) * 100) : 0;
-                const colors = ['bg-rose-500', 'bg-purple-500', 'bg-amber-500', 'bg-slate-500'];
-                const barColor = colors[idx % colors.length];
-
-                return (
-                  <div key={penyebab} className="space-y-1">
-                    <div className="flex justify-between font-semibold text-slate-700">
-                      <span>{penyebab}</span>
-                      <span className="font-mono text-slate-900 font-bold">{count} Jiwa ({pct}%)</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                      <div
-                        className={`${barColor} h-full rounded-full transition-all duration-500`}
-                        style={{ width: `${Math.max(8, pct)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                <span>Distribusi Usia: <strong>{decLansia} Lansia, {decDewasa} Dewasa</strong></span>
-                <span className="text-rose-700 font-semibold cursor-pointer" onClick={() => onNavigateTab('meninggal')}>
-                  Lihat Surat Kematian →
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 2-Column Section: Demografi Khusus & Administrasi Lingkungan */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Posyandu & Social Aid Indicator (1 Col) */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-              <HeartHandshake className="w-4 h-4 text-pink-600" />
-              Posyandu & Kelompok Rentan
-            </h3>
-            <button
-              onClick={() => onNavigateTab('statistik')}
-              className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer"
-            >
-              Detail →
-            </button>
-          </div>
-
-          <div className="space-y-2.5 text-xs">
-            <div className="flex items-center justify-between p-3 bg-slate-50 text-slate-800 rounded-xl border border-slate-200">
-              <div className="flex items-center gap-2">
-                <Baby className="w-4 h-4 text-pink-600" />
-                <span className="font-semibold text-slate-700">Balita (0 - 5 Thn)</span>
-              </div>
-              <span className="font-bold font-mono text-sm text-slate-900">{totalBalita} Anak</span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-50 text-slate-800 rounded-xl border border-slate-200">
-              <div className="flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-amber-600" />
-                <span className="font-semibold text-slate-700">Lansia (60+ Thn)</span>
-              </div>
-              <span className="font-bold font-mono text-sm text-slate-900">{totalLansia} Jiwa</span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-50 text-slate-800 rounded-xl border border-slate-200">
-              <div className="flex items-center gap-2">
-                <Home className="w-4 h-4 text-blue-600" />
-                <span className="font-semibold text-slate-700">KTP Domisili Blok D</span>
-              </div>
-              <span className="font-bold font-mono text-sm text-blue-700">{totalKtpBlokD} Jiwa</span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-50 text-slate-800 rounded-xl border border-slate-200">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-slate-600" />
-                <span className="font-semibold text-slate-700">KTP Luar (Domisili/Sewa)</span>
-              </div>
-              <span className="font-bold font-mono text-sm text-slate-800">{totalKtpLuar} Jiwa</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Ringkasan Administrasi & Utilitas Unit Rumah (2 Cols) */}
-        <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                Status Kepemilikan & Administrasi Kependudukan
-              </h3>
-              <p className="text-xs text-slate-500">
-                Ringkasan legalitas hunian, kepemilikan unit, dan jaminan kesehatan warga Blok D
-              </p>
-            </div>
-
-            <button
-              onClick={() => onNavigateTab('statistik')}
-              className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer"
-            >
-              Statistik Lengkap →
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Kepemilikan SHM/Milik Sendiri */}
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs flex flex-col justify-between">
-              <div>
-                <span className="text-slate-500 text-[11px] font-semibold block">Kepemilikan Mandiri (SHM/HGB)</span>
-                <div className="text-xl font-bold font-mono text-slate-900 mt-1">{totalMilikSendiri} Unit</div>
-              </div>
-              <div className="mt-2 pt-2 border-t border-slate-200 text-[11px] text-emerald-700 font-semibold">
-                {Math.round((totalMilikSendiri / Math.max(1, totalHouses)) * 100)}% dari total unit
-              </div>
-            </div>
-
-            {/* Sewa / Kontrak */}
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs flex flex-col justify-between">
-              <div>
-                <span className="text-slate-500 text-[11px] font-semibold block">Sewa / Kontrak Rumah</span>
-                <div className="text-xl font-bold font-mono text-slate-900 mt-1">{totalSewaKontrak} Unit</div>
-              </div>
-              <div className="mt-2 pt-2 border-t border-slate-200 text-[11px] text-amber-700 font-semibold">
-                {Math.round((totalSewaKontrak / Math.max(1, totalHouses)) * 100)}% status sewa/kontrak
-              </div>
-            </div>
-
-            {/* BPJS Aktif */}
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs flex flex-col justify-between">
-              <div>
-                <span className="text-slate-500 text-[11px] font-semibold block">Jaminan BPJS Kesehatan Aktif</span>
-                <div className="text-xl font-bold font-mono text-blue-700 mt-1">{totalBpjsAktif} Jiwa</div>
-              </div>
-              <div className="mt-2 pt-2 border-t border-slate-200 text-[11px] text-blue-700 font-semibold">
-                {Math.round((totalBpjsAktif / Math.max(1, totalJiwa)) * 100)}% warga terproteksi
-              </div>
-            </div>
-          </div>
-
-          <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-100 text-xs text-blue-900 flex flex-wrap items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-600" />
-              <span>Daya Listrik: 1300 VA & 2200 VA</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Droplets className="w-3.5 h-3.5 text-blue-600" />
-              <span>Sumber Air: Sumur Bor / Jetpump Mandiri</span>
-            </span>
-            <span className="flex items-center gap-1.5 font-semibold text-emerald-800">
-              <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Wifi: {totalRumahWifi} Rumah ({pctRumahWifi}%)</span>
-            </span>
-            <span className="flex items-center gap-1.5 font-semibold text-slate-700">
-              <Car className="w-3.5 h-3.5 text-slate-600" />
-              <span>Kendaraan: {totalMobil} Mobil, {totalMotor} Motor</span>
-            </span>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[11px]">
+          <span className="flex items-center gap-1.5 font-semibold text-slate-700">
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            <span>Listrik: Rata-rata 1300 VA & 2200 VA</span>
+          </span>
+          <span className="flex items-center gap-1.5 font-semibold text-slate-700">
+            <Droplets className="w-3.5 h-3.5 text-blue-600" />
+            <span>Sumber Air: Sumur Bor / Jetpump Mandiri</span>
+          </span>
+          <span className="flex items-center gap-1.5 font-semibold text-emerald-800">
+            <Wifi className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Wifi: {totalRumahWifi} Rumah ({pctRumahWifi}%)</span>
+          </span>
+          <span className="flex items-center gap-1.5 font-semibold text-slate-700">
+            <Car className="w-3.5 h-3.5 text-slate-600" />
+            <span>Kendaraan: {totalMobil} Mobil, {totalMotor} Motor</span>
+          </span>
         </div>
       </div>
 
@@ -721,10 +692,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
               <div>
                 <h3 className="font-bold text-sm text-slate-900">
-                  Total Pendidikan Warga Aktif
+                  Ringkasan Jenjang Pendidikan Warga
                 </h3>
                 <p className="text-[11px] text-slate-500">
-                  Distribusi jenjang pendidikan terakhir ({totalJiwa} Jiwa)
+                  Distribusi kualifikasi pendidikan warga aktif ({totalJiwa} Jiwa)
                 </p>
               </div>
             </div>
@@ -738,15 +709,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           </div>
 
-          {totalJiwa === 0 ? (
-            <div className="text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-xl border border-slate-200">
-              Belum ada data warga terdaftar.
+          {sortedPendidikan.length === 0 ? (
+            <div className="text-center py-6 text-xs text-slate-400">
+              Belum ada data pendidikan tercatat
             </div>
           ) : (
             <div className="space-y-2.5 text-xs">
               {sortedPendidikan.slice(0, 5).map(([jenjang, count], idx) => {
                 const pct = totalJiwa > 0 ? Math.round((count / totalJiwa) * 100) : 0;
-                const colors = ['bg-indigo-600', 'bg-blue-600', 'bg-sky-500', 'bg-teal-500', 'bg-slate-500'];
+                const colors = ['bg-indigo-600', 'bg-blue-600', 'bg-sky-600', 'bg-teal-600', 'bg-emerald-600', 'bg-slate-500'];
                 const barColor = colors[idx % colors.length];
 
                 return (
@@ -830,49 +801,97 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Quick Access Action Grid */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
         <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500">
-          Menu Navigasi Cepat Pengurus Data Blok D
+          {!isGuest ? 'Menu Akses Pengurus RT' : 'Layanan & Informasi Warga Blok D'}
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
-          <button
-            onClick={() => onNavigateTab('warga')}
-            className="p-3.5 bg-slate-50 hover:bg-blue-50/70 hover:border-blue-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <Users className="w-5 h-5 text-blue-600" />
-            <span>Data Warga & KK</span>
-          </button>
+        {!isGuest ? (
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+            <button
+              onClick={() => onNavigateTab('warga')}
+              className="p-3.5 bg-slate-50 hover:bg-blue-50/70 hover:border-blue-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Users className="w-5 h-5 text-blue-600" />
+              <span>Data Warga & Rumah</span>
+            </button>
 
-          <button
-            onClick={() => onNavigateTab('pindah')}
-            className="p-3.5 bg-slate-50 hover:bg-amber-50/70 hover:border-amber-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <Truck className="w-5 h-5 text-amber-600" />
-            <span>Warga Pindah</span>
-          </button>
+            <button
+              onClick={() => onNavigateTab('statistik')}
+              className="p-3.5 bg-slate-50 hover:bg-sky-50/70 hover:border-sky-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <BarChart3 className="w-5 h-5 text-sky-600" />
+              <span>Statistik Demografi</span>
+            </button>
 
-          <button
-            onClick={() => onNavigateTab('meninggal')}
-            className="p-3.5 bg-slate-50 hover:bg-rose-50/70 hover:border-rose-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <HeartCrack className="w-5 h-5 text-rose-600" />
-            <span>Warga Meninggal</span>
-          </button>
+            <button
+              onClick={() => onNavigateTab('pengantar')}
+              className="p-3.5 bg-slate-50 hover:bg-emerald-50/70 hover:border-emerald-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <FileText className="w-5 h-5 text-emerald-600" />
+              <span>Layanan Surat RT</span>
+            </button>
 
-          <button
-            onClick={() => onNavigateTab('statistik')}
-            className="p-3.5 bg-slate-50 hover:bg-sky-50/70 hover:border-sky-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <BarChart3 className="w-5 h-5 text-sky-600" />
-            <span>Statistik Demografi</span>
-          </button>
+            <button
+              onClick={() => onNavigateTab('pindah')}
+              className="p-3.5 bg-slate-50 hover:bg-amber-50/70 hover:border-amber-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Truck className="w-5 h-5 text-amber-600" />
+              <span>Warga Pindah</span>
+            </button>
 
-          <button
-            onClick={() => onNavigateTab('ekspor')}
-            className="p-3.5 bg-slate-50 hover:bg-indigo-50/70 hover:border-indigo-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer col-span-2 sm:col-span-1"
-          >
-            <Download className="w-5 h-5 text-indigo-600" />
-            <span>Ekspor Excel & Cetak</span>
-          </button>
-        </div>
+            <button
+              onClick={() => onNavigateTab('ekspor')}
+              className="p-3.5 bg-slate-50 hover:bg-indigo-50/70 hover:border-indigo-300 text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm flex flex-col items-center gap-1.5 transition-all cursor-pointer col-span-2 sm:col-span-1"
+            >
+              <Download className="w-5 h-5 text-indigo-600" />
+              <span>Ekspor & Cetak</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                <Info className="w-4 h-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="font-bold text-slate-900">Akses Warga Terproteksi</div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Warga dapat melihat ringkasan statistik, fasilitas lingkungan, dan transparansi data Rt.005 Dan Rw.005 secara umum.
+                </p>
+              </div>
+            </div>
+
+            {new Date().getDay() === 6 ? (
+              <button
+                onClick={() => onNavigateTab('ronda')}
+                className="p-4 bg-emerald-50 hover:bg-emerald-100/70 border border-emerald-200 rounded-xl flex items-start gap-3 text-left transition-all cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                  <Shield className="w-4 h-4" />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="font-bold text-emerald-900 flex items-center gap-1.5">
+                    <span>Jadwal & Presensi Ronda Sabtu</span>
+                    <span className="px-1.5 py-0.5 bg-emerald-600 text-white rounded text-[10px] font-bold">Malam Ini</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-700">
+                    Klik di sini untuk mengisi daftar hadir siskamling & jadwal jaga malam pos kamling.
+                  </p>
+                </div>
+              </button>
+            ) : (
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div className="space-y-1">
+                  <div className="font-bold text-slate-900">Jadwal Ronda Siskamling</div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Menu presensi dan jadwal piket pos kamling diaktifkan secara otomatis setiap hari Sabtu malam.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

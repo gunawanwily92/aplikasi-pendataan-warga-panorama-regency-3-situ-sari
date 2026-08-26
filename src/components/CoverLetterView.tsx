@@ -45,7 +45,7 @@ const COMMON_PURPOSES = [
   { label: 'Pembaruan Kartu Keluarga', category: 'KTP / KK' as const, text: 'Pengurusan penerbitan / perubahan data Kartu Keluarga (KK) baru di Kantor Desa Situ Sari & Disdukcapil Kab. Bogor.' },
   { label: 'Pendaftaran BPJS Kesehatan', category: 'BPJS Kesehatan / Bansos' as const, text: 'Persyaratan pendaftaran / pengaktifan kepesertaan jaminan BPJS Kesehatan / BPJS Ketenagakerjaan.' },
   { label: 'Buka Rekening Bank / KPR', category: 'Bank / Finansial' as const, text: 'Persyaratan pembukaan rekening tabungan / giro perbankan dan kelengkapan berkas administrasi finansial.' },
-  { label: 'Keterangan Domisili Tinggal', category: 'Keterangan Domisili' as const, text: 'Keterangan domisili bertempat tinggal resmi di wilayah Perumahan Panorama Regency 3 Blok D (RT 004 / RW 012).' },
+  { label: 'Keterangan Domisili Tinggal', category: 'Keterangan Domisili' as const, text: 'Keterangan domisili bertempat tinggal resmi di wilayah Perumahan Panorama Regency 3 Blok D (Rt.005 Dan Rw.005).' },
   { label: 'Surat Keterangan Usaha (SKU)', category: 'Keterangan Usaha (SKU)' as const, text: 'Keterangan memiliki dan menjalankan kegiatan usaha mikro/kecil perorangan di wilayah tempat tinggal Blok D.' },
   { label: 'Pengantar Nikah (N1-N4)', category: 'Pengantar Nikah' as const, text: 'Pengurusan berkas pengantar pernikahan (Surat Keterangan Untuk Nikah / N1-N4) ke Kantor Desa Situ Sari & KUA Kecamatan Cileungsi.' },
   { label: 'Pengajuan Beasiswa Sekolah', category: 'Pendidikan / Beasiswa' as const, text: 'Persyaratan administrasi pengajuan bantuan beasiswa pendidikan dan keringanan biaya sekolah / perkuliahan.' },
@@ -107,7 +107,7 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
     pekerjaan: 'Karyawan Swasta',
     noHp: '',
     alamatKtp: '',
-    alamatDomisili: 'Perumahan Panorama Regency 3 Blok D, RT 004 / RW 012, Desa Situ Sari, Kec. Cileungsi, Kab. Bogor 16820',
+    alamatDomisili: 'Perumahan Panorama Regency 3 Blok D, Rt.005 Dan Rw.005, Desa Situ Sari, Kec. Cileungsi, Kab. Bogor 16820',
     kategoriKeperluan: 'SKCK Kepolisian',
     keperluan: 'Pengurusan Surat Keterangan Catatan Kepolisian (SKCK) untuk melengkapi persyaratan administrasi pekerjaan.',
     keteranganLain: 'Yang bersangkutan adalah warga tetap beritikad baik dan tidak pernah tersangkut perkara kriminal/hukum.',
@@ -158,8 +158,8 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
       statusKawin: 'Kawin',
       pekerjaan: 'Karyawan Swasta',
       noHp: '',
-      alamatKtp: 'Perumahan Panorama Regency 3 Blok D1 No. 01, RT 004 / RW 012, Desa Situ Sari, Kec. Cileungsi, Kab. Bogor',
-      alamatDomisili: 'Perumahan Panorama Regency 3 Blok D1 No. 01, RT 004 / RW 012, Desa Situ Sari, Kec. Cileungsi, Kab. Bogor',
+      alamatKtp: 'Perumahan Panorama Regency 3 Blok D1 No. 01, Rt.005 Dan Rw.005, Desa Situ Sari, Kec. Cileungsi, Kab. Bogor',
+      alamatDomisili: 'Perumahan Panorama Regency 3 Blok D1 No. 01, Rt.005 Dan Rw.005, Desa Situ Sari, Kec. Cileungsi, Kab. Bogor',
       kategoriKeperluan: 'SKCK Kepolisian',
       keperluan: 'Pengurusan Surat Keterangan Catatan Kepolisian (SKCK) untuk keperluan kelengkapan berkas administrasi pekerjaan.',
       keteranganLain: 'Yang bersangkutan adalah warga beritikad baik dan tidak pernah tersangkut perkara kriminal/hukum di lingkungan kami.',
@@ -203,7 +203,7 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
     const res = targetHouse.residents.find((r) => r.id === residentId);
     if (!res) return;
 
-    const domisiliAddress = `Perumahan Panorama Regency 3 ${targetHouse.nomorRumah}, RT 004 / RW 012, Desa Situ Sari, Kec. Cileungsi, Kab. Bogor 16820`;
+    const domisiliAddress = `Perumahan Panorama Regency 3 ${targetHouse.nomorRumah}, Rt.005 Dan Rw.005, Desa Situ Sari, Kec. Cileungsi, Kab. Bogor 16820`;
 
     setFormState((prev) => ({
       ...prev,
@@ -308,14 +308,14 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
   };
 
   const handleCopyText = (letter: CoverLetter) => {
-    const text = `*SURAT PENGANTAR RT 004 / RW 012 - BLOK D*\nNomor: ${letter.nomorSurat}\nTanggal: ${formatDateNamedMonth(letter.tanggalSurat)}\n\n*DATA PEMOHON:*\n• Nama: ${letter.namaPemohon}\n• NIK: ${letter.nik}\n• Tempat/Tgl Lahir: ${letter.tempatLahir}, ${formatDateNamedMonth(letter.tanggalLahir)}\n• Jenis Kelamin: ${letter.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}\n• Agama: ${letter.agama}\n• Status Kawin: ${letter.statusKawin}\n• Pekerjaan: ${letter.pekerjaan}\n• Alamat Domisili: ${letter.alamatDomisili}\n\n*MAKSUD / KEPERLUAN:*\n${letter.keperluan}\n\n*KETERANGAN:*\n${letter.keteranganLain || 'Warga berkelakuan baik dan berdomisili resmi di Panorama Regency 3 Blok D.'}\n\n_Pengurus Paguyuban Blok D - Panorama Regency 3 Situ Sari_`;
+    const text = `*SURAT PENGANTAR Rt.005 Dan Rw.005 - BLOK D*\nNomor: ${letter.nomorSurat}\nTanggal: ${formatDateNamedMonth(letter.tanggalSurat)}\n\n*DATA PEMOHON:*\n• Nama: ${letter.namaPemohon}\n• NIK: ${letter.nik}\n• Tempat/Tgl Lahir: ${letter.tempatLahir}, ${formatDateNamedMonth(letter.tanggalLahir)}\n• Jenis Kelamin: ${letter.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}\n• Agama: ${letter.agama}\n• Status Kawin: ${letter.statusKawin}\n• Pekerjaan: ${letter.pekerjaan}\n• Alamat Domisili: ${letter.alamatDomisili}\n\n*MAKSUD / KEPERLUAN:*\n${letter.keperluan}\n\n*KETERANGAN:*\n${letter.keteranganLain || 'Warga berkelakuan baik dan berdomisili resmi di Panorama Regency 3 Blok D.'}\n\n_Pengurus Paguyuban Blok D - Panorama Regency 3 Situ Sari_`;
     navigator.clipboard.writeText(text);
     setCopiedId(letter.id);
     setTimeout(() => setCopiedId(null), 2500);
   };
 
   const generateWhatsAppShare = (letter: CoverLetter) => {
-    const text = `*SURAT PENGANTAR RESMI BLOK D - PANORAMA REGENCY 3*\nNomor: ${letter.nomorSurat}\n\nKepada Yth. Bapak/Ibu Petugas,\n\nDengan ini menerangkan bahwa warga kami:\n• Nama: *${letter.namaPemohon}*\n• NIK: ${letter.nik}\n• Rumah: ${letter.nomorRumah}\n• Keperluan: *${letter.keperluan}*\n\nTercatat sebagai warga resmi Blok D Panorama Regency 3 (RT 004 / RW 012 Desa Situ Sari). Surat fisik bertandatangan & cap basah siap diverifikasi. Terima kasih.`;
+    const text = `*SURAT PENGANTAR RESMI BLOK D - PANORAMA REGENCY 3*\nNomor: ${letter.nomorSurat}\n\nKepada Yth. Bapak/Ibu Petugas,\n\nDengan ini menerangkan bahwa warga kami:\n• Nama: *${letter.namaPemohon}*\n• NIK: ${letter.nik}\n• Rumah: ${letter.nomorRumah}\n• Keperluan: *${letter.keperluan}*\n\nTercatat sebagai warga resmi Blok D Panorama Regency 3 (Rt.005 Dan Rw.005 Desa Situ Sari). Surat fisik bertandatangan & cap basah siap diverifikasi. Terima kasih.`;
     return `https://wa.me/${letter.noHp ? letter.noHp.replace(/^0/, '62') : ''}?text=${encodeURIComponent(text)}`;
   };
 
@@ -350,7 +350,7 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
               Pembuatan Surat Pengantar Warga
             </h2>
             <p className="text-xs sm:text-sm text-blue-200/90 leading-relaxed">
-              Buat dan cetak surat pengantar resmi Blok D (RT 004 / RW 012) untuk berbagai keperluan warga (KTP, KK, SKCK, BPJS, Bank, Usaha, Nikah, Beasiswa, dll.) dalam format 1 lembar A4 siap print.
+              Buat dan cetak surat pengantar resmi Blok D (Rt.005 Dan Rw.005) untuk berbagai keperluan warga (KTP, KK, SKCK, BPJS, Bank, Usaha, Nikah, Beasiswa, dll.) dalam format 1 lembar A4 siap print.
             </p>
           </div>
 
@@ -600,7 +600,7 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
                     {editingLetter ? 'Edit Surat Pengantar' : 'Form Buat Surat Pengantar Warga'}
                   </h3>
                   <p className="text-[11px] text-slate-300">
-                    Administrasi Surat Pengantar Resmi Blok D (RT 004 / RW 012)
+                    Administrasi Surat Pengantar Resmi Blok D (Rt.005 Dan Rw.005)
                   </p>
                 </div>
               </div>
@@ -999,7 +999,7 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
                       BLOK D
                     </div>
                     <div className="text-[11px] font-sans text-slate-600">
-                      Wilayah Administrasi: Rukun Tetangga (RT) 004 • Rukun Warga (RW) 012 • Kab. Bogor 16820
+                      Wilayah Administrasi: Rt.005 Dan Rw.005 • Kab. Bogor 16820
                     </div>
                   </div>
                   <div className="w-14 sm:w-16 hidden sm:block"></div>
@@ -1018,7 +1018,7 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
                 {/* Body text */}
                 <div className="space-y-3 print:space-y-2 text-xs font-sans text-slate-800 leading-normal print:leading-tight">
                   <p>
-                    Yang bertanda tangan di bawah ini Pengurus Paguyuban Blok D bersama Ketua RT 004 dan RW 012 Perumahan Panorama Regency 3, Desa Situ Sari, Kecamatan Cileungsi, Kabupaten Bogor, menerangkan dengan sebenarnya bahwa:
+                    Yang bertanda tangan di bawah ini Pengurus Paguyuban Blok D bersama Ketua Rt.005 Dan Rw.005 Perumahan Panorama Regency 3, Desa Situ Sari, Kecamatan Cileungsi, Kabupaten Bogor, menerangkan dengan sebenarnya bahwa:
                   </p>
 
                   <div className="pl-2 sm:pl-4 font-sans">
@@ -1126,7 +1126,7 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
                 <div className="grid grid-cols-4 text-center text-xs font-sans text-slate-900 gap-2 pt-1 print:pt-0.5">
                   <div className="space-y-12 sm:space-y-14 print:space-y-10 flex flex-col justify-between">
                     <div>
-                      <strong>Ketua RW 012</strong>
+                      <strong>Ketua RW 005</strong>
                     </div>
                     <div>
                       <div className="font-bold underline text-[11px]">
@@ -1137,7 +1137,7 @@ export const CoverLetterView: React.FC<CoverLetterViewProps> = ({
 
                   <div className="space-y-12 sm:space-y-14 print:space-y-10 flex flex-col justify-between">
                     <div>
-                      <strong>Ketua RT 004</strong>
+                      <strong>Ketua RT 005</strong>
                     </div>
                     <div>
                       <div className="font-bold underline text-[11px]">

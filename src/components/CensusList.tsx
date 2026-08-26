@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { HouseUnit, Resident } from '../types/census';
-import { calculateAge, generateWhatsAppMessage, formatDateIndo, formatDateTimeIndo, formatRelativeTimeIndo } from '../utils/censusHelpers';
+import { calculateAge, generateWhatsAppMessage, formatDateIndo, formatDateTimeIndo, formatRelativeTimeIndo, getCitizenRegistrationNumber } from '../utils/censusHelpers';
 import { Home, Users, Search, Phone, Edit2, Trash2, CreditCard, MessageSquare, Shield, Check, Copy, FileText, ChevronDown, ChevronUp, UserCheck, AlertCircle, AlertTriangle, X, Clock, MapPin, Wifi } from 'lucide-react';
 
 interface CensusListProps {
@@ -503,11 +503,12 @@ export const CensusList: React.FC<CensusListProps> = ({
                         <div className="bg-white p-3 rounded-xl border border-slate-200">
                           <span className="font-bold text-slate-700 block mb-1.5">Info Sarana & Keamanan:</span>
                           <div className="space-y-1 text-[11px] text-slate-600">
+                            <div>No. Registrasi: <button onClick={() => handleCopy(getCitizenRegistrationNumber(house), 'No. Registrasi')} className="font-mono font-bold text-blue-700 hover:underline inline-flex items-center gap-1 cursor-pointer" title="Klik untuk salin no registrasi"><span>{getCitizenRegistrationNumber(house)}</span><Copy className="w-2.5 h-2.5" /></button></div>
                             <div>Listrik: <strong className="text-slate-800">{house.dayaListrik}</strong> | Air: <strong className="text-slate-800">{house.sumberAir}</strong> | Wifi: <strong className="text-blue-700">{house.wifi || 'Tanpa Wifi'}</strong></div>
                             {house.tanggalPindahMasuk && (
                               <div>Pindah Masuk: <strong className="text-slate-800">{formatDateIndo(house.tanggalPindahMasuk)}</strong></div>
                             )}
-                            <div>Wilayah: <strong className="text-slate-800">RT {house.rt || '004'} / RW {house.rw || '012'}</strong></div>
+                            <div>Wilayah: <strong className="text-slate-800">RT {house.rt || '005'} / RW {house.rw || '005'}</strong></div>
                             <div>Kontak Darurat: <strong className="text-slate-800">{house.kontakDarurat?.nama || '-'}</strong> ({house.kontakDarurat?.noHp || '-'})</div>
                             {house.catatanRumah && <div className="text-amber-800 italic">Catatan: {house.catatanRumah}</div>}
                           </div>

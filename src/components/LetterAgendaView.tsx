@@ -678,7 +678,7 @@ export const LetterAgendaView: React.FC<LetterAgendaViewProps> = ({
                 PENGURUS PAGUYUBAN WARGA BLOK D
               </h2>
               <h1 className="text-base font-black uppercase tracking-tight text-slate-950">
-                RUKUN TETANGGA 004 / RUKUN WARGA 012
+                Rt.005 Dan Rw.005
               </h1>
               <p className="text-[10px] font-semibold text-slate-800">
                 PERUMAHAN PANORAMA REGENCY 3 - DESA SITU SARI

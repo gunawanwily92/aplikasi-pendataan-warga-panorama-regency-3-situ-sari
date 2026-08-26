@@ -1,4 +1,58 @@
 import { HouseUnit, Resident } from '../types/census';
+import { getRomanMonth } from './letterNumberUtils';
+
+/**
+ * Format nomor registrasi data pada tanda bukti dan kartu data warga blok D:
+ * Format: DS/PR3/{Blok: Blok D1/D2/D3/D4}/{Nomor Rumah}/{Bulan Romawi}/{Tahun}
+ * Contoh: DS/PR3/Blok D1/01/VIII/2026 atau DS/PR3/Blok D2/12A/VIII/2026
+ */
+export function getCitizenRegistrationNumber(house: HouseUnit): string {
+  if (!house) return 'DS/PR3/Blok D1/01/I/2026';
+
+  const rawHouseNo = (house.nomorRumah || '').trim();
+
+  // 1. Ekstrak Blok (Blok D1, Blok D2, Blok D3, atau Blok D4)
+  let blok = 'Blok D1';
+  const matchD = rawHouseNo.match(/d([1-4])/i) || (house.id || '').match(/d([1-4])/i);
+  if (matchD) {
+    blok = `Blok D${matchD[1]}`;
+  }
+
+  // 2. Ekstrak Nomor Rumah
+  let noRumah = '01';
+  const noMatch = rawHouseNo.match(/(?:no\.?|nomor)\s*([0-9a-zA-Z]+)/i);
+  if (noMatch) {
+    noRumah = noMatch[1].trim();
+  } else {
+    const slashMatch = rawHouseNo.match(/(?:d[1-4][\/\s-]*|blok\s*[d1-4]?[\/\s-]*)(\d+[a-zA-Z]?)/i);
+    if (slashMatch) {
+      noRumah = slashMatch[1].trim();
+    } else {
+      const anyNum = rawHouseNo.match(/(\d+[a-zA-Z]?)/);
+      if (anyNum) {
+        noRumah = anyNum[1].trim();
+      }
+    }
+  }
+
+  // Standarisasi jika angka 1-9 menjadi 2 digit (misal: 1 -> 01)
+  if (/^\d+$/.test(noRumah) && parseInt(noRumah, 10) < 10) {
+    noRumah = `0${parseInt(noRumah, 10)}`;
+  }
+
+  // 3. Bulan saat didata dalam jenis Romawi (I - XII)
+  const targetDateStr = house.tanggalSensus || house.updatedAt || new Date().toISOString();
+  const romanMonth = getRomanMonth(targetDateStr);
+
+  // 4. Tahun saat didata
+  let year = new Date().getFullYear();
+  const yearMatch = targetDateStr.match(/^(\d{4})/);
+  if (yearMatch) {
+    year = parseInt(yearMatch[1], 10);
+  }
+
+  return `DS/PR3/${blok}/${noRumah}/${romanMonth}/${year}`;
+}
 
 export function calculateAge(birthDateStr: string): number {
   if (!birthDateStr || birthDateStr === '-') return 0;
@@ -240,6 +294,7 @@ export function exportCensusToCSV(houses: HouseUnit[]): void {
 }
 
 export function generateWhatsAppMessage(house: HouseUnit): string {
+  const regNumber = getCitizenRegistrationNumber(house);
   const residentsList = house.residents.map((r, i) => 
     `${i + 1}. *${r.nama}* (${r.hubunganKeluarga}) - ${r.jenisKelamin === 'L' ? 'L' : 'P'}, ${r.pekerjaan || '-'}`
   ).join('\n');
@@ -250,9 +305,10 @@ export function generateWhatsAppMessage(house: HouseUnit): string {
 
   const text = `📋 *KARTU TANDA BUKTI DATA WARGA BLOK D*
 🏘️ *Panorama Regency 3 Situ Sari*
+🔖 *No. Registrasi*: ${regNumber}
 
 🏡 *Unit Rumah*: ${house.nomorRumah}
-📍 *Wilayah Administrasi*: RT ${house.rt || '004'} • RW ${house.rw || '012'}
+📍 *Wilayah Administrasi*: RT ${house.rt || '005'} • RW ${house.rw || '005'}
 📌 *Status Hunian*: ${house.statusHunian.toUpperCase()} (${house.kepemilikan})
 👨‍👩‍👧‍👦 *Kepala Keluarga*: ${house.kepalaKeluargaNama || '-'}
 🔢 *No. KK*: ${house.nomorKK || '-'}

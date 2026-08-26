@@ -1,6 +1,6 @@
 import React from 'react';
 import { HouseUnit } from '../types/census';
-import { formatDateIndo, formatDateDDMMYYYY, formatDateNamedMonth, formatDateTimeIndo, calculateAge, generateWhatsAppMessage } from '../utils/censusHelpers';
+import { formatDateIndo, formatDateDDMMYYYY, formatDateNamedMonth, formatDateTimeIndo, calculateAge, generateWhatsAppMessage, getCitizenRegistrationNumber } from '../utils/censusHelpers';
 import { LogoBlokD } from './LogoBlokD';
 import { X, Printer, MessageSquare, CheckCircle, Shield, QrCode, Clock } from 'lucide-react';
 
@@ -76,12 +76,12 @@ export const CitizenCardModal: React.FC<CitizenCardModalProps> = ({ house, onClo
                   BLOK D
                 </h4>
                 <p className="text-[11px] print:text-[10px] text-slate-600 font-medium">
-                  Wilayah Administrasi: Rukun Tetangga (RT) 004 • Rukun Warga (RW) 012 • Kab. Bogor 16820
+                  Wilayah Administrasi: Rt.005 Dan Rw.005 • Kab. Bogor 16820
                 </p>
               </div>
             </div>
-            <div className="mt-1.5 print:mt-0.5 text-[10px] font-mono tracking-widest text-slate-400">
-              NOMOR REGISTRASI DATA: DATA/PR3/BLOK-D/{house.id}/{new Date().getFullYear()}
+            <div className="mt-1.5 print:mt-0.5 text-[10px] font-mono tracking-wider text-slate-500 font-semibold">
+              NOMOR REGISTRASI DATA: {getCitizenRegistrationNumber(house)}
             </div>
           </div>
 
@@ -108,7 +108,7 @@ export const CitizenCardModal: React.FC<CitizenCardModalProps> = ({ house, onClo
             <div>
               <span className="text-slate-400 block text-[10px]">Status Hunian & Wilayah:</span>
               <strong className="capitalize text-slate-900 block truncate">
-                {house.statusHunian} (RT {house.rt || '004'})
+                {house.statusHunian} (RT {house.rt || '005'})
               </strong>
             </div>
             <div>
@@ -210,10 +210,12 @@ export const CitizenCardModal: React.FC<CitizenCardModalProps> = ({ house, onClo
                 <div className="w-11 h-11 bg-white p-1 rounded-lg border border-slate-300 flex items-center justify-center text-slate-800 shadow-sm shrink-0">
                   <QrCode className="w-9 h-9 text-slate-800" />
                 </div>
-                <div className="text-[10px] space-y-0.5">
+                <div className="text-[10px] space-y-0.5 min-w-0">
                   <div className="font-bold text-slate-800">QR Verifikasi Data</div>
-                  <div className="text-slate-500">Database Digital Blok D</div>
-                  <div className="text-emerald-700 font-bold">TERVERIFIKASI SAH ✓</div>
+                  <div className="text-slate-500 font-mono text-[9px] truncate" title={getCitizenRegistrationNumber(house)}>
+                    {getCitizenRegistrationNumber(house)}
+                  </div>
+                  <div className="text-emerald-700 font-bold text-[9px]">TERVERIFIKASI SAH ✓</div>
                 </div>
               </div>
 

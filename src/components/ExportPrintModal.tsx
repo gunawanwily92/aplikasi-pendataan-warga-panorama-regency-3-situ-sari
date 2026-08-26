@@ -35,8 +35,8 @@ export const ExportPrintModal: React.FC<ExportPrintModalProps> = ({
     const dataToExport = {
       app: 'Data Warga Panorama Regency 3 Blok D',
       exportDate: new Date().toISOString(),
-      rt: '004',
-      rw: '012',
+      rt: '005',
+      rw: '005',
       houses,
       rondaSchedule,
       movedCitizens: movedList,
@@ -158,7 +158,7 @@ export const ExportPrintModal: React.FC<ExportPrintModalProps> = ({
             </span>
             <h4 className="font-bold text-slate-900 text-xs">Surat Pengantar Warga</h4>
             <p className="text-[11px] text-slate-500 leading-snug">
-              Surat pengantar RT 004 / RW 012 untuk berbagai kebutuhan (KTP, KK, SKCK, BPJS, Bank, dll).
+              Surat pengantar Rt.005 Dan Rw.005 untuk berbagai kebutuhan (KTP, KK, SKCK, BPJS, Bank, dll).
             </p>
           </div>
         </div>
@@ -256,7 +256,7 @@ export const ExportPrintModal: React.FC<ExportPrintModalProps> = ({
                 REKAPITULASI LAPORAN DATA WARGA • PANORAMA REGENCY 3
               </h4>
               <p className="text-xs text-slate-600 font-medium">
-                Wilayah Administrasi: Rukun Tetangga (RT) 004 • Rukun Warga (RW) 012 • Tahun {new Date().getFullYear()}
+                Wilayah Administrasi: Rt.005 Dan Rw.005 • Tahun {new Date().getFullYear()}
               </p>
             </div>
           </div>
@@ -332,7 +332,7 @@ export const ExportPrintModal: React.FC<ExportPrintModalProps> = ({
             <div className="space-y-12">
               <div>
                 <span className="text-[11px] text-slate-500 block">Mengetahui,</span>
-                <strong className="text-slate-900 font-bold">Ketua RW 012</strong>
+                <strong className="text-slate-900 font-bold">Ketua RW 005</strong>
               </div>
               <div>
                 <strong className="font-bold text-slate-900 border-t border-slate-400 pt-0.5 block">
@@ -344,7 +344,7 @@ export const ExportPrintModal: React.FC<ExportPrintModalProps> = ({
             <div className="space-y-12">
               <div>
                 <span className="text-[11px] text-slate-500 block">Mengetahui,</span>
-                <strong className="text-slate-900 font-bold">Ketua RT 004</strong>
+                <strong className="text-slate-900 font-bold">Ketua RT 005</strong>
               </div>
               <div>
                 <strong className="font-bold text-slate-900 border-t border-slate-400 pt-0.5 block">

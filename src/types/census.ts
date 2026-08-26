@@ -192,11 +192,24 @@ export interface CoverLetter {
   updatedAt?: string;
 }
 
+export interface RondaAttendance {
+  id: string;
+  tanggal: string; // YYYY-MM-DD
+  nama: string;
+  nomorRumah: string;
+  jamHadir: string; // HH:mm
+  posJaga?: string;
+  keterangan?: string;
+  createdAt?: string;
+}
+
 export interface AuthUser {
   username: string;
   nama: string;
   jabatan: string;
   loginTime: string;
+  role?: 'admin' | 'pengurus' | 'warga';
+  isGuest?: boolean;
 }
 
-export type ActiveTab = 'dashboard' | 'warga' | 'pengantar' | 'pindah' | 'meninggal' | 'agenda' | 'statistik' | 'ekspor';
+export type ActiveTab = 'dashboard' | 'warga' | 'pengantar' | 'pindah' | 'meninggal' | 'agenda' | 'statistik' | 'ekspor' | 'ronda';
