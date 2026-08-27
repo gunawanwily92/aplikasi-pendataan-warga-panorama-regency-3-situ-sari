@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Users, PlusCircle, BarChart3, Download, Search, LogOut, UserCheck, Truck, HeartCrack, FileText, BookOpen, Database, Shield } from 'lucide-react';
+import { Home, Users, PlusCircle, BarChart3, Download, Search, LogOut, UserCheck, Truck, HeartCrack, FileText, BookOpen, Database, Shield, Video } from 'lucide-react';
 import { ActiveTab, HouseUnit, AuthUser } from '../types/census';
 import { getAllResidents } from '../utils/censusHelpers';
 import { LogoBlokD } from './LogoBlokD';
@@ -38,18 +38,20 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems: NavItem[] = [];
 
   if (isGuest) {
-    // Khusus Warga: Ringkasan dan Modul Ronda Siskamling
+    // Khusus Warga: Ringkasan, Modul Ronda Siskamling, dan CCTV Monitoring
     navItems.push(
       { id: 'dashboard', label: 'Ringkasan', icon: Home },
-      { id: 'ronda', label: 'Siskamling & Ronda', icon: Shield, badge: isSaturday ? 'Sabtu' : 'Aktif' }
+      { id: 'ronda', label: 'Siskamling & Ronda', icon: Shield, badge: isSaturday ? 'Sabtu' : 'Aktif' },
+      { id: 'cctv', label: 'Monitoring CCTV', icon: Video, badge: 'Live' }
     );
   } else {
-    // Pengurus RT: Akses penuh administrasi + Modul Ronda
+    // Pengurus RT: Akses penuh administrasi + Modul Ronda + CCTV
     navItems.push(
       { id: 'dashboard', label: 'Ringkasan', icon: Home },
       { id: 'warga', label: 'Data Warga', icon: Users },
       { id: 'pengantar', label: 'Surat Pengantar', icon: FileText },
       { id: 'ronda', label: 'Siskamling & Ronda', icon: Shield, badge: isSaturday ? 'Sabtu' : 'Aktif' },
+      { id: 'cctv', label: 'Monitoring CCTV', icon: Video, badge: 'Live' },
       { id: 'pindah', label: 'Warga Pindah', icon: Truck },
       { id: 'meninggal', label: 'Warga Meninggal', icon: HeartCrack },
       { id: 'agenda', label: 'Agenda Surat', icon: BookOpen },

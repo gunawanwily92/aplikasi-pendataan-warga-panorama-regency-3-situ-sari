@@ -1,6 +1,6 @@
 {
   "name": "Data Warga Panorama Regency 3 Blok D",
-  "description": "Aplikasi pendataan dan data warga digital Panorama Regency 3 Blok D dengan denah interaktif, manajemen KK, modul siskamling & ronda, pelacakan pekerjaan & penghasilan warga bekerja, surat pengantar RT, surat pindah/kematian, statistik demografi, dan penomoran registrasi data terstandar.",
+  "description": "Aplikasi pendataan dan data warga digital Panorama Regency 3 Blok D dengan denah interaktif, manajemen KK, modul siskamling & ronda, monitoring CCTV terpadu, pelacakan pekerjaan & penghasilan warga bekerja, surat pengantar RT, surat pindah/kematian, statistik demografi, dan penomoran registrasi data terstandar.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

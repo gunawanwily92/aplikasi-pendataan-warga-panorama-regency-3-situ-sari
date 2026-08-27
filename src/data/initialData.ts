@@ -1,4 +1,4 @@
-import { HouseUnit, RondaSchedule, MovedCitizen, DeceasedCitizen, CoverLetter } from '../types/census';
+import { HouseUnit, RondaSchedule, MovedCitizen, DeceasedCitizen, CoverLetter, CCTVCamera, CCTVIncidentLog } from '../types/census';
 
 /**
  * Mendeteksi apakah format nomor rumah adalah generic "Blok D" lama (bukan Blok D1, D2, D3, D4 resmi).
@@ -215,5 +215,175 @@ export function saveCoverLettersToStorage(data: CoverLetter[]): void {
     localStorage.setItem(COVER_LETTERS_STORAGE_KEY, JSON.stringify(clean));
   } catch (e) {
     console.error('Failed to save cover letters to localStorage', e);
+  }
+}
+
+export const CCTV_CAMERAS_STORAGE_KEY = 'PR3_CENSUS_CCTV_CAMERAS_V1';
+export const CCTV_LOGS_STORAGE_KEY = 'PR3_CENSUS_CCTV_LOGS_V1';
+
+export const INITIAL_CCTV_CAMERAS: CCTVCamera[] = [
+  {
+    id: 'cam-01',
+    nomorKamera: 'CAM-01',
+    nama: 'Gate Utama & Pos Kamling Blok D',
+    lokasi: 'Gerbang Masuk Utama Blok D (Pos 1 Utama & Gang D1)',
+    blokTerkait: 'Gerbang Utama',
+    tipeKamera: 'Hikvision ColorVu 4MP (Outdoor Audio)',
+    ipAddress: '192.168.1.101',
+    streamUrl: '',
+    status: 'online',
+    kualitas: '4K UHD',
+    nightVision: true,
+    audioSupport: true,
+    ptzSupport: true,
+    ptzPreset: { pan: 0, tilt: 0, zoom: 1 },
+    storageDays: 30,
+    petugasTeknisi: 'Tim IT & Keamanan Blok D',
+    catatan: 'Kamera utama pengawasan keluar-masuk kendaraan & tamu warga 24 jam.',
+    lastOnline: new Date().toISOString()
+  },
+  {
+    id: 'cam-02',
+    nomorKamera: 'CAM-02',
+    nama: 'Simpang Utama D1 & D2',
+    lokasi: 'Simpang Tiga Utama Blok D1 & D2 (Depan Unit D2/01)',
+    blokTerkait: 'Blok D2',
+    tipeKamera: 'Hikvision Bullet IP 4MP Full HD',
+    ipAddress: '192.168.1.102',
+    streamUrl: '',
+    status: 'online',
+    kualitas: '1080p FHD',
+    nightVision: true,
+    audioSupport: false,
+    ptzSupport: false,
+    storageDays: 14,
+    petugasTeknisi: 'Tim IT & Keamanan Blok D',
+    catatan: 'Memantau arus lalu lintas antar gang D1 dan D2.',
+    lastOnline: new Date().toISOString()
+  },
+  {
+    id: 'cam-03',
+    nomorKamera: 'CAM-03',
+    nama: 'Jalur Tengah Blok D2 & D3',
+    lokasi: 'Koridor Tengah Antar Gang Blok D2 & D3',
+    blokTerkait: 'Blok D3',
+    tipeKamera: 'Dahua Smart IR 4MP Outdoor',
+    ipAddress: '192.168.1.103',
+    streamUrl: '',
+    status: 'online',
+    kualitas: '1080p FHD',
+    nightVision: true,
+    audioSupport: true,
+    ptzSupport: false,
+    storageDays: 14,
+    petugasTeknisi: 'Tim IT & Keamanan Blok D',
+    catatan: 'Pengawasan area rumah dan jalan tengah D2-D3.',
+    lastOnline: new Date().toISOString()
+  },
+  {
+    id: 'cam-04',
+    nomorKamera: 'CAM-04',
+    nama: 'Taman Fasum & Pos Lingkungan D3',
+    lokasi: 'Area Taman Fasum & Pos Pantau Lingkungan D3/D4',
+    blokTerkait: 'Area Fasum',
+    tipeKamera: 'Hikvision PTZ 4MP Speed Dome',
+    ipAddress: '192.168.1.104',
+    streamUrl: '',
+    status: 'online',
+    kualitas: '2K QHD',
+    nightVision: true,
+    audioSupport: true,
+    ptzSupport: true,
+    ptzPreset: { pan: 45, tilt: -10, zoom: 1.5 },
+    storageDays: 30,
+    petugasTeknisi: 'Tim IT & Keamanan Blok D',
+    catatan: 'Memantau aktivitas anak-anak dan area fasilitas umum perumahan.',
+    lastOnline: new Date().toISOString()
+  },
+  {
+    id: 'cam-05',
+    nomorKamera: 'CAM-05',
+    nama: 'Ujung Gang Blok D4 & Perimeter Belakang',
+    lokasi: 'Jalur Belakang Blok D4 & Batas Pagar Perimeter Perumahan',
+    blokTerkait: 'Blok D4',
+    tipeKamera: 'Hikvision ColorVu Bullet 4MP',
+    ipAddress: '192.168.1.105',
+    streamUrl: '',
+    status: 'online',
+    kualitas: '1080p FHD',
+    nightVision: true,
+    audioSupport: false,
+    ptzSupport: false,
+    storageDays: 14,
+    petugasTeknisi: 'Tim IT & Keamanan Blok D',
+    catatan: 'Pengawasan keamanan batas perimeter belakang dan dinding perumahan.',
+    lastOnline: new Date().toISOString()
+  },
+  {
+    id: 'cam-06',
+    nomorKamera: 'CAM-06',
+    nama: 'Sudut Blok D1 Belakang & Jalur Darurat',
+    lokasi: 'Ujung Barat Gang Blok D1 Belakang',
+    blokTerkait: 'Blok D1',
+    tipeKamera: 'Dahua Full Color 4MP',
+    ipAddress: '192.168.1.106',
+    streamUrl: '',
+    status: 'online',
+    kualitas: '1080p FHD',
+    nightVision: true,
+    audioSupport: false,
+    ptzSupport: false,
+    storageDays: 14,
+    petugasTeknisi: 'Tim IT & Keamanan Blok D',
+    catatan: 'Pengawasan pintu darurat dan sudut belakang perumahan.',
+    lastOnline: new Date().toISOString()
+  }
+];
+
+export const INITIAL_CCTV_LOGS: CCTVIncidentLog[] = [];
+
+export function loadCCTVCamerasFromStorage(): CCTVCamera[] {
+  try {
+    const saved = localStorage.getItem(CCTV_CAMERAS_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load CCTV cameras from localStorage', e);
+  }
+  return INITIAL_CCTV_CAMERAS;
+}
+
+export function saveCCTVCamerasToStorage(data: CCTVCamera[]): void {
+  try {
+    localStorage.setItem(CCTV_CAMERAS_STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('Failed to save CCTV cameras to localStorage', e);
+  }
+}
+
+export function loadCCTVLogsFromStorage(): CCTVIncidentLog[] {
+  try {
+    const saved = localStorage.getItem(CCTV_LOGS_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load CCTV incident logs from localStorage', e);
+  }
+  return INITIAL_CCTV_LOGS;
+}
+
+export function saveCCTVLogsToStorage(data: CCTVIncidentLog[]): void {
+  try {
+    localStorage.setItem(CCTV_LOGS_STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('Failed to save CCTV incident logs to localStorage', e);
   }
 }

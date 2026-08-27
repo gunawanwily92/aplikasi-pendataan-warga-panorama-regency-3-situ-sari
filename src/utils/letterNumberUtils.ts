@@ -356,9 +356,15 @@ export function getAllOutgoingLetters(
 
   // Urutkan berdasarkan Tahun (descending), kemudian Nomor Urut (descending), kemudian Tanggal (descending)
   return records.sort((a, b) => {
-    if (b.tahun !== a.tahun) return b.tahun - a.tahun;
-    if (b.nomorUrut !== a.nomorUrut) return b.nomorUrut - a.nomorUrut;
-    return new Date(b.tanggalSurat).getTime() - new Date(a.tanggalSurat).getTime();
+    const yrA = Number(a?.tahun) || 0;
+    const yrB = Number(b?.tahun) || 0;
+    if (yrB !== yrA) return yrB - yrA;
+    const numA = Number(a?.nomorUrut) || 0;
+    const numB = Number(b?.nomorUrut) || 0;
+    if (numB !== numA) return numB - numA;
+    const timeA = a?.tanggalSurat ? new Date(a.tanggalSurat).getTime() : 0;
+    const timeB = b?.tanggalSurat ? new Date(b.tanggalSurat).getTime() : 0;
+    return (isNaN(timeB) ? 0 : timeB) - (isNaN(timeA) ? 0 : timeA);
   });
 }
 

@@ -31,6 +31,16 @@ service cloud.firestore {
       allow read, write: if true;
     }
     
+    // Koleksi daftar kamera CCTV Blok D
+    match /cctv_cameras/{cameraId} {
+      allow read, write: if true;
+    }
+    
+    // Koleksi log insiden pemantauan CCTV Blok D
+    match /cctv_incident_logs/{logId} {
+      allow read, write: if true;
+    }
+    
     // Konfigurasi sistem umum
     match /system_config/{configId} {
       allow read, write: if true;

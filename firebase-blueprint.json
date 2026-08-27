@@ -88,6 +88,44 @@
         "keperluan": { "type": "string" }
       },
       "required": ["id", "nomorSurat", "tanggalSurat", "keperluan"]
+    },
+    "CCTVCamera": {
+      "title": "CCTVCamera",
+      "description": "Daftar kamera CCTV pengawas lingkungan Blok D",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nomorKamera": { "type": "string" },
+        "namaLokasi": { "type": "string" },
+        "area": { "type": "string" },
+        "status": { "type": "string" },
+        "streamUrl": { "type": "string" },
+        "ipAddress": { "type": "string" },
+        "resolusi": { "type": "string" },
+        "isPTZ": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "nomorKamera", "namaLokasi", "status"]
+    },
+    "CCTVIncidentLog": {
+      "title": "CCTVIncidentLog",
+      "description": "Log kejadian & insiden keamanan terpantau CCTV Blok D",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tanggal": { "type": "string" },
+        "waktu": { "type": "string" },
+        "kameraId": { "type": "string" },
+        "kategori": { "type": "string" },
+        "deskripsi": { "type": "string" },
+        "tingkatUrgensi": { "type": "string" },
+        "status": { "type": "string" },
+        "pelapor": { "type": "string" },
+        "nomorRumahPelapor": { "type": "string" },
+        "tindakan": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "tanggal", "waktu", "kategori", "deskripsi", "status"]
     }
   },
   "firestore": {
@@ -114,6 +152,14 @@
     "cover_letters": {
       "entity": "CoverLetter",
       "description": "Koleksi arsip surat pengantar RT"
+    },
+    "cctv_cameras": {
+      "entity": "CCTVCamera",
+      "description": "Koleksi titik kamera CCTV lingkungan Blok D"
+    },
+    "cctv_incident_logs": {
+      "entity": "CCTVIncidentLog",
+      "description": "Koleksi log insiden & pemantauan keamanan CCTV Blok D"
     }
   }
 }

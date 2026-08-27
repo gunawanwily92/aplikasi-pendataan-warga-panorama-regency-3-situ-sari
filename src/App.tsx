@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { HouseUnit, RondaSchedule, ActiveTab, AuthUser, MovedCitizen, DeceasedCitizen, CoverLetter, RondaAttendance } from './types/census';
+import {
+  HouseUnit,
+  RondaSchedule,
+  ActiveTab,
+  AuthUser,
+  MovedCitizen,
+  DeceasedCitizen,
+  CoverLetter,
+  RondaAttendance,
+  CCTVCamera,
+  CCTVIncidentLog
+} from './types/census';
 import {
   INITIAL_HOUSES,
   INITIAL_RONDA_SCHEDULE,
   INITIAL_MOVED_CITIZENS,
   INITIAL_DECEASED_CITIZENS,
   INITIAL_COVER_LETTERS,
+  INITIAL_CCTV_CAMERAS,
+  INITIAL_CCTV_LOGS,
   isGenericBlokD,
   loadHousesFromStorage,
   saveHousesToStorage,
@@ -16,7 +29,11 @@ import {
   loadDeceasedFromStorage,
   saveDeceasedToStorage,
   loadCoverLettersFromStorage,
-  saveCoverLettersToStorage
+  saveCoverLettersToStorage,
+  loadCCTVCamerasFromStorage,
+  saveCCTVCamerasToStorage,
+  loadCCTVLogsFromStorage,
+  saveCCTVLogsToStorage
 } from './data/initialData';
 import {
   subscribeHouses,
@@ -40,6 +57,13 @@ import {
   subscribeRondaAttendance,
   saveRondaAttendanceToFirestore,
   deleteRondaAttendanceFromFirestore,
+  subscribeCCTVCameras,
+  saveCCTVCameraToFirestore,
+  deleteCCTVCameraFromFirestore,
+  syncAllCCTVCamerasToFirestore,
+  subscribeCCTVLogs,
+  saveCCTVLogToFirestore,
+  deleteCCTVLogFromFirestore,
   bootstrapFirestoreIfEmpty
 } from './services/firestoreService';
 import { Header } from './components/Header';
@@ -55,7 +79,8 @@ import { CensusFormModal } from './components/CensusFormModal';
 import { CitizenCardModal } from './components/CitizenCardModal';
 import { LoginScreen } from './components/LoginScreen';
 import { RondaModule } from './components/RondaModule';
-import { Home, Users, BarChart3, PlusCircle, LogOut, AlertTriangle, Building2, ShieldCheck, FileSpreadsheet, Truck, HeartCrack, FileText, BookOpen, Shield } from 'lucide-react';
+import { CCTVMonitoringModule } from './components/CCTVMonitoringModule';
+import { Home, Users, BarChart3, PlusCircle, LogOut, AlertTriangle, Building2, ShieldCheck, FileSpreadsheet, Truck, HeartCrack, FileText, BookOpen, Shield, Video } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
@@ -76,6 +101,8 @@ export default function App() {
   const [deceasedList, setDeceasedList] = useState<DeceasedCitizen[]>(() => loadDeceasedFromStorage());
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>(() => loadCoverLettersFromStorage());
   const [rondaAttendances, setRondaAttendances] = useState<RondaAttendance[]>([]);
+  const [cctvCameras, setCctvCameras] = useState<CCTVCamera[]>(() => loadCCTVCamerasFromStorage());
+  const [cctvLogs, setCctvLogs] = useState<CCTVIncidentLog[]>(() => loadCCTVLogsFromStorage());
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -83,10 +110,10 @@ export default function App() {
   const isGuest = currentUser?.isGuest || currentUser?.role === 'warga';
   const isSaturday = new Date().getDay() === 6;
 
-  // Proteksi: Jika user adalah Warga dan mencoba membuka tab di luar Ringkasan dan Ronda, arahkan ke dashboard
+  // Proteksi: Jika user adalah Warga dan mencoba membuka tab di luar Ringkasan, Ronda, dan CCTV, arahkan ke dashboard
   useEffect(() => {
     if (isGuest) {
-      if (activeTab !== 'dashboard' && activeTab !== 'ronda') {
+      if (activeTab !== 'dashboard' && activeTab !== 'ronda' && activeTab !== 'cctv') {
         setActiveTab('dashboard');
       }
     }
@@ -107,7 +134,8 @@ export default function App() {
       loadRondaFromStorage(),
       loadMovedFromStorage(),
       loadDeceasedFromStorage(),
-      loadCoverLettersFromStorage()
+      loadCoverLettersFromStorage(),
+      loadCCTVCamerasFromStorage()
     );
 
     // 2. Pasang real-time listeners ke Firestore
@@ -142,6 +170,18 @@ export default function App() {
       setRondaAttendances(firestoreAttendance);
     });
 
+    const unsubCctvCameras = subscribeCCTVCameras((firestoreCameras) => {
+      if (firestoreCameras.length > 0) {
+        setCctvCameras(firestoreCameras);
+        saveCCTVCamerasToStorage(firestoreCameras);
+      }
+    });
+
+    const unsubCctvLogs = subscribeCCTVLogs((firestoreLogs) => {
+      setCctvLogs(firestoreLogs);
+      saveCCTVLogsToStorage(firestoreLogs);
+    });
+
     return () => {
       unsubHouses();
       unsubRonda();
@@ -149,6 +189,8 @@ export default function App() {
       unsubDeceased();
       unsubLetters();
       unsubAttendance();
+      unsubCctvCameras();
+      unsubCctvLogs();
     };
   }, []);
 
@@ -172,6 +214,14 @@ export default function App() {
   useEffect(() => {
     saveCoverLettersToStorage(coverLetters);
   }, [coverLetters]);
+
+  useEffect(() => {
+    saveCCTVCamerasToStorage(cctvCameras);
+  }, [cctvCameras]);
+
+  useEffect(() => {
+    saveCCTVLogsToStorage(cctvLogs);
+  }, [cctvLogs]);
 
   const handleLogout = () => {
     setIsLogoutModalOpen(true);
@@ -329,6 +379,45 @@ export default function App() {
     saveRondaToFirestore(schedules).catch(console.error);
   };
 
+  // Handlers for CCTV Cameras & Incident Logs
+  const handleSaveCCTVCamera = (camera: CCTVCamera) => {
+    setCctvCameras((prev) => {
+      const exists = prev.some((c) => c.id === camera.id);
+      if (exists) {
+        return prev.map((c) => (c.id === camera.id ? camera : c));
+      }
+      return [...prev, camera];
+    });
+    saveCCTVCameraToFirestore(camera).catch(console.error);
+  };
+
+  const handleDeleteCCTVCamera = (id: string) => {
+    setCctvCameras((prev) => prev.filter((c) => c.id !== id));
+    deleteCCTVCameraFromFirestore(id).catch(console.error);
+  };
+
+  const handleResetCCTVCameras = () => {
+    setCctvCameras(INITIAL_CCTV_CAMERAS);
+    saveCCTVCamerasToStorage(INITIAL_CCTV_CAMERAS);
+    syncAllCCTVCamerasToFirestore(INITIAL_CCTV_CAMERAS).catch(console.error);
+  };
+
+  const handleSaveCCTVLog = (log: CCTVIncidentLog) => {
+    setCctvLogs((prev) => {
+      const exists = prev.some((l) => l.id === log.id);
+      if (exists) {
+        return prev.map((l) => (l.id === log.id ? log : l));
+      }
+      return [log, ...prev];
+    });
+    saveCCTVLogToFirestore(log).catch(console.error);
+  };
+
+  const handleDeleteCCTVLog = (id: string) => {
+    setCctvLogs((prev) => prev.filter((l) => l.id !== id));
+    deleteCCTVLogFromFirestore(id).catch(console.error);
+  };
+
   const handleImportData = (
     importedHouses: HouseUnit[],
     importedMoved?: MovedCitizen[],
@@ -364,11 +453,14 @@ export default function App() {
     setMovedList(INITIAL_MOVED_CITIZENS);
     setDeceasedList(INITIAL_DECEASED_CITIZENS);
     setCoverLetters(INITIAL_COVER_LETTERS);
+    setCctvCameras(INITIAL_CCTV_CAMERAS);
+    setCctvLogs(INITIAL_CCTV_LOGS);
     syncAllHousesToFirestore(INITIAL_HOUSES).catch(console.error);
     saveRondaToFirestore(INITIAL_RONDA_SCHEDULE).catch(console.error);
     syncAllMovedCitizensToFirestore(INITIAL_MOVED_CITIZENS).catch(console.error);
     syncAllDeceasedCitizensToFirestore(INITIAL_DECEASED_CITIZENS).catch(console.error);
     syncAllCoverLettersToFirestore(INITIAL_COVER_LETTERS).catch(console.error);
+    syncAllCCTVCamerasToFirestore(INITIAL_CCTV_CAMERAS).catch(console.error);
   };
 
   if (!currentUser) {
@@ -404,7 +496,7 @@ export default function App() {
             currentUser={currentUser}
             onOpenAddModal={handleOpenAdd}
             onNavigateTab={(tab) => {
-              if (isGuest && tab !== 'dashboard' && tab !== 'ronda') {
+              if (isGuest && tab !== 'dashboard' && tab !== 'ronda' && tab !== 'cctv') {
                 return;
               }
               setActiveTab(tab);
@@ -428,6 +520,21 @@ export default function App() {
             onAddAttendance={handleAddRondaAttendance}
             onDeleteAttendance={handleDeleteRondaAttendance}
             onUpdateSchedule={handleUpdateRondaSchedule}
+          />
+        )}
+
+        {/* Tab Monitoring CCTV Lingkungan Blok D */}
+        {activeTab === 'cctv' && (
+          <CCTVMonitoringModule
+            currentUser={currentUser}
+            cameras={cctvCameras}
+            logs={cctvLogs}
+            houses={houses}
+            onSaveCamera={handleSaveCCTVCamera}
+            onDeleteCamera={handleDeleteCCTVCamera}
+            onSaveLog={handleSaveCCTVLog}
+            onDeleteLog={handleDeleteCCTVLog}
+            onResetCameras={handleResetCCTVCameras}
           />
         )}
 
@@ -550,6 +657,16 @@ export default function App() {
         >
           <Shield className="w-4 h-4" />
           <span className="text-[9px]">Ronda (Sabtu)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('cctv')}
+          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+            activeTab === 'cctv' ? 'text-sky-600 font-bold' : 'text-slate-500 font-medium'
+          }`}
+        >
+          <Video className="w-4 h-4" />
+          <span className="text-[9px]">CCTV</span>
         </button>
 
         {!isGuest ? (

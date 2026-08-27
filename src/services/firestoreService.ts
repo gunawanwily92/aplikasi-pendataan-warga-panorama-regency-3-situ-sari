@@ -9,7 +9,7 @@ import {
   Unsubscribe
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { HouseUnit, RondaSchedule, MovedCitizen, DeceasedCitizen, CoverLetter, RondaAttendance } from '../types/census';
+import { HouseUnit, RondaSchedule, MovedCitizen, DeceasedCitizen, CoverLetter, RondaAttendance, CCTVCamera, CCTVIncidentLog } from '../types/census';
 import { isGenericBlokD } from '../data/initialData';
 
 const HOUSES_COLL = 'houses';
@@ -18,6 +18,8 @@ const RONDA_ATTENDANCE_COLL = 'ronda_attendance';
 const MOVED_COLL = 'moved_citizens';
 const DECEASED_COLL = 'deceased_citizens';
 const COVER_LETTERS_COLL = 'cover_letters';
+const CCTV_CAMERAS_COLL = 'cctv_cameras';
+const CCTV_LOGS_COLL = 'cctv_incident_logs';
 
 /**
  * Real-time listener untuk data Rumah & Warga Aktif
@@ -140,9 +142,9 @@ export function subscribeRonda(
       if (items.length > 0) {
         // Urutkan berdasarkan pekan (1..5) atau hari
         items.sort((a, b) => {
-          if (a.pekan && b.pekan) return a.pekan - b.pekan;
-          const hariA = (a && a.hari) ? String(a.hari) : '';
-          const hariB = (b && b.hari) ? String(b.hari) : '';
+          if (a?.pekan && b?.pekan) return a.pekan - b.pekan;
+          const hariA = String(a?.hari || '');
+          const hariB = String(b?.hari || '');
           return hariA.localeCompare(hariB);
         });
         onData(items);
@@ -395,6 +397,120 @@ export async function syncAllCoverLettersToFirestore(list: CoverLetter[]): Promi
 }
 
 /**
+ * Real-time listener untuk data Kamera CCTV
+ */
+export function subscribeCCTVCameras(
+  onData: (cameras: CCTVCamera[]) => void,
+  onError?: (err: Error) => void
+): Unsubscribe {
+  const collRef = collection(db, CCTV_CAMERAS_COLL);
+  return onSnapshot(
+    collRef,
+    (snapshot) => {
+      const items: CCTVCamera[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data() as CCTVCamera;
+        items.push({
+          ...data,
+          id: docSnap.id || data.id
+        });
+      });
+      // Urutkan berdasarkan nomorKamera (CAM-01, CAM-02, dst)
+      items.sort((a, b) => (a.nomorKamera || '').localeCompare(b.nomorKamera || ''));
+      onData(items);
+    },
+    (error) => {
+      console.error('Error listening to Firestore CCTV cameras:', error);
+      if (onError) onError(error);
+    }
+  );
+}
+
+export async function saveCCTVCameraToFirestore(camera: CCTVCamera): Promise<void> {
+  if (!camera.id) return;
+  const cleanCamera = {
+    ...camera,
+    updatedAt: new Date().toISOString()
+  };
+  const docRef = doc(db, CCTV_CAMERAS_COLL, camera.id);
+  await setDoc(docRef, cleanCamera, { merge: true });
+}
+
+export async function deleteCCTVCameraFromFirestore(id: string): Promise<void> {
+  if (!id) return;
+  const docRef = doc(db, CCTV_CAMERAS_COLL, id);
+  await deleteDoc(docRef);
+}
+
+export async function syncAllCCTVCamerasToFirestore(list: CCTVCamera[]): Promise<void> {
+  const snapshot = await getDocs(collection(db, CCTV_CAMERAS_COLL));
+  const existingIds = new Set<string>();
+  snapshot.forEach((d) => existingIds.add(d.id));
+  const targetIds = new Set(list.map((m) => m.id));
+
+  const batch = writeBatch(db);
+  for (const existingId of existingIds) {
+    if (!targetIds.has(existingId)) {
+      batch.delete(doc(db, CCTV_CAMERAS_COLL, existingId));
+    }
+  }
+  for (const item of list) {
+    batch.set(doc(db, CCTV_CAMERAS_COLL, item.id), item, { merge: true });
+  }
+  await batch.commit();
+}
+
+/**
+ * Real-time listener untuk Laporan Insiden & Log Kejadian CCTV
+ */
+export function subscribeCCTVLogs(
+  onData: (logs: CCTVIncidentLog[]) => void,
+  onError?: (err: Error) => void
+): Unsubscribe {
+  const collRef = collection(db, CCTV_LOGS_COLL);
+  return onSnapshot(
+    collRef,
+    (snapshot) => {
+      const items: CCTVIncidentLog[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data() as CCTVIncidentLog;
+        items.push({
+          ...data,
+          id: docSnap.id || data.id
+        });
+      });
+      // Urutkan log dari yang terbaru
+      items.sort((a, b) => {
+        const timeA = `${a.tanggal || ''} ${a.waktu || ''}`;
+        const timeB = `${b.tanggal || ''} ${b.waktu || ''}`;
+        return timeB.localeCompare(timeA);
+      });
+      onData(items);
+    },
+    (error) => {
+      console.error('Error listening to Firestore CCTV logs:', error);
+      if (onError) onError(error);
+    }
+  );
+}
+
+export async function saveCCTVLogToFirestore(log: CCTVIncidentLog): Promise<void> {
+  if (!log.id) return;
+  const cleanLog = {
+    ...log,
+    updatedAt: new Date().toISOString()
+  };
+  const docRef = doc(db, CCTV_LOGS_COLL, log.id);
+  await setDoc(docRef, cleanLog, { merge: true });
+}
+
+export async function deleteCCTVLogFromFirestore(id: string): Promise<void> {
+  if (!id) return;
+  const docRef = doc(db, CCTV_LOGS_COLL, id);
+  await deleteDoc(docRef);
+}
+
+/**
  * Inisialisasi awal ke Firestore jika koleksi masih kosong
  */
 export async function bootstrapFirestoreIfEmpty(
@@ -402,7 +518,8 @@ export async function bootstrapFirestoreIfEmpty(
   initialRonda: RondaSchedule[],
   initialMoved: MovedCitizen[],
   initialDeceased: DeceasedCitizen[],
-  initialLetters: CoverLetter[]
+  initialLetters: CoverLetter[],
+  initialCameras?: CCTVCamera[]
 ): Promise<void> {
   try {
     const housesSnap = await getDocs(collection(db, HOUSES_COLL));
@@ -430,6 +547,14 @@ export async function bootstrapFirestoreIfEmpty(
     const lettersSnap = await getDocs(collection(db, COVER_LETTERS_COLL));
     if (lettersSnap.empty && initialLetters.length > 0) {
       await syncAllCoverLettersToFirestore(initialLetters);
+    }
+
+    if (initialCameras && initialCameras.length > 0) {
+      const camerasSnap = await getDocs(collection(db, CCTV_CAMERAS_COLL));
+      if (camerasSnap.empty) {
+        console.log('Bootstrapping initial CCTV cameras to Firestore...');
+        await syncAllCCTVCamerasToFirestore(initialCameras);
+      }
     }
   } catch (err) {
     console.error('Error bootstrapping data to Firestore:', err);

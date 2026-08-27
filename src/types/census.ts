@@ -247,4 +247,45 @@ export interface AuthUser {
   isGuest?: boolean;
 }
 
-export type ActiveTab = 'dashboard' | 'warga' | 'pengantar' | 'pindah' | 'meninggal' | 'agenda' | 'statistik' | 'ekspor' | 'ronda';
+export interface CCTVCamera {
+  id: string;
+  nomorKamera: string; // e.g. "CAM-01"
+  nama: string; // e.g. "Pos Kamling Utama & Gate Masuk"
+  lokasi: string; // e.g. "Gerbang Masuk Utama Blok D"
+  blokTerkait: string; // e.g. "Blok D1", "Blok D2", "Blok D3", "Blok D4", "Gerbang Utama", "Area Fasum"
+  tipeKamera: string; // e.g. "Hikvision ColorVu 4MP / PTZ Outdoor"
+  ipAddress?: string;
+  streamUrl?: string; // RTSP / HLS / MP4 / Youtube Live / Web Embed stream link
+  status: 'online' | 'offline' | 'maintenance' | 'warning';
+  kualitas: '1080p FHD' | '2K QHD' | '4K UHD' | '720p HD';
+  nightVision: boolean;
+  audioSupport: boolean;
+  ptzSupport: boolean;
+  ptzPreset?: { pan: number; tilt: number; zoom: number };
+  lastOnline?: string; // ISO date string
+  storageDays: number; // e.g. 14 or 30 days
+  petugasTeknisi?: string;
+  catatan?: string;
+  thumbnailUrl?: string;
+  updatedAt?: string;
+  createdAt?: string;
+}
+
+export interface CCTVIncidentLog {
+  id: string;
+  tanggal: string; // YYYY-MM-DD
+  waktu: string; // HH:mm
+  kameraId: string;
+  kameraNama: string;
+  lokasi: string;
+  kategori: 'Mencurigakan' | 'Pelanggaran Kecepatan / Parkir' | 'Hewan Liar' | 'Sampah Liar' | 'Tamu Larut Malam' | 'Insiden / Kerusakan Fasum' | 'Lainnya';
+  deskripsi: string;
+  pelapor: string;
+  statusPenanganan: 'Perlu Verifikasi' | 'Ditindaklanjuti' | 'Selesai / Aman';
+  snapshotUrl?: string;
+  catatanPetugas?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type ActiveTab = 'dashboard' | 'warga' | 'pengantar' | 'pindah' | 'meninggal' | 'agenda' | 'statistik' | 'ekspor' | 'ronda' | 'cctv';

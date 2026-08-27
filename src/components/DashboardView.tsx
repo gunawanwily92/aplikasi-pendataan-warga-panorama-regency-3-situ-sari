@@ -38,7 +38,8 @@ import {
   DollarSign,
   Coins,
   Wallet,
-  TrendingUp
+  TrendingUp,
+  Video
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -454,16 +455,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           {/* Card 1: Pengurusan Surat Pengantar */}
-          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5">
-            <div className="font-bold text-blue-300 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-blue-400 shrink-0" />
-              <span>Pengurusan Surat Pengantar RT</span>
+          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="font-bold text-blue-300 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-blue-400 shrink-0" />
+                <span>Surat Pengantar RT</span>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Pengurusan KTP/KK, SKCK, BPJS, Bank, SKU, Domisili, dan Nikah dengan melampirkan foto KTP & KK.
+              </p>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Warga yang memerlukan Surat Pengantar RT (KTP/KK, SKCK, BPJS, Bank, SKU, Domisili, Nikah) dapat menghubungi Pengurus RT dengan melampirkan foto KTP & KK.
-            </p>
             {!isGuest ? (
               <button
                 onClick={() => onNavigateTab('pengantar')}
@@ -480,34 +483,58 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Card 2: Jadwal Ronda & Keamanan */}
-          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5">
-            <div className="font-bold text-emerald-300 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Siskamling & Ronda Sabtu (7 Petugas)</span>
+          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="font-bold text-emerald-300 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Ronda Sabtu (7 Petugas)</span>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Jadwal siskamling rutin <strong className="text-amber-300">setiap hari Sabtu</strong> (22.00 - 04.00 WIB) dengan kuota 7 orang per regu.
+              </p>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Jadwal siskamling rutin <strong className="text-amber-300">hanya setiap hari Sabtu / malam Minggu</strong> (22.00 - 04.00 WIB) dengan kuota 7 orang petugas per regu piket.
-            </p>
             <button
               onClick={() => onNavigateTab('ronda')}
               className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer pt-1"
             >
-              <span>Lihat Jadwal Ronda Sabtu & Presensi</span>
+              <span>Lihat Jadwal Ronda</span>
               <ArrowRight className="w-3 h-3" />
             </button>
           </div>
 
-          {/* Card 3: Pelaporan Warga Baru / Pindah */}
-          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5">
-            <div className="font-bold text-amber-300 flex items-center gap-2">
-              <Truck className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>Lapor Warga Baru & Pindah</span>
+          {/* Card 3: Monitoring CCTV 24 Jam */}
+          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="font-bold text-sky-300 flex items-center gap-2">
+                <Video className="w-4 h-4 text-sky-400 shrink-0" />
+                <span>Monitoring CCTV 24 Jam</span>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Pantau 6 titik kamera lingkungan Blok D (Gerbang Masuk, Simpang D1–D4, Taman Fasum, Perimeter Belakang).
+              </p>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Warga baru pindah masuk atau warga yang akan pindah domisili wajib melapor 1x24 jam kepada Ketua RT / Pengurus untuk sinkronisasi database kependudukan.
-            </p>
+            <button
+              onClick={() => onNavigateTab('cctv')}
+              className="text-xs text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1 cursor-pointer pt-1"
+            >
+              <span>Buka Live CCTV Blok D</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Card 4: Pelaporan Warga Baru / Pindah */}
+          <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="font-bold text-amber-300 flex items-center gap-2">
+                <Truck className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Lapor Warga Pindah / Baru</span>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Warga baru atau pindah domisili wajib lapor 1x24 jam kepada Ketua RT untuk pembaruan data kependudukan.
+              </p>
+            </div>
             <div className="text-[11px] text-amber-300 pt-1 font-semibold">
-              Lapor ke Ketua Blok D / Korlap Wilayah
+              Lapor ke Ketua Blok D / Korlap
             </div>
           </div>
         </div>
