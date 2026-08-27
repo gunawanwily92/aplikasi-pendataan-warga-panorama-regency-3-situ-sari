@@ -21,7 +21,12 @@ import {
   Calendar,
   GraduationCap,
   Droplet,
-  Wifi
+  Wifi,
+  DollarSign,
+  Coins,
+  Wallet,
+  Landmark,
+  TrendingUp
 } from 'lucide-react';
 
 interface DemographicsStatsProps {
@@ -60,15 +65,102 @@ export const DemographicsStats: React.FC<DemographicsStatsProps> = ({
     else ageLansia++;
   });
 
-  // Occupations
+  // Helper deteksi warga bekerja
+  const isResidentWorking = (pekerjaan?: string) => {
+    const p = (pekerjaan || '').trim().toLowerCase();
+    if (!p) return false;
+    if (
+      p.includes('belum') ||
+      p.includes('tidak bekerja') ||
+      p.includes('pelajar') ||
+      p.includes('mahasiswa') ||
+      p.includes('irt') ||
+      p.includes('ibu rumah tangga') ||
+      p.includes('pensiun') ||
+      p.includes('balita') ||
+      p.includes('anak')
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  // Occupations & Employment
   const occupationMap: Record<string, number> = {};
+  const employedResidents = allResidents.filter(({ resident: r }) => isResidentWorking(r.pekerjaan));
+  const totalBekerja = employedResidents.length;
+  const totalTidakBekerja = totalJiwa - totalBekerja;
+  const pctBekerja = totalJiwa > 0 ? Math.round((totalBekerja / totalJiwa) * 100) : 0;
+  const pctTidakBekerja = totalJiwa > 0 ? Math.round((totalTidakBekerja / totalJiwa) * 100) : 0;
+
   allResidents.forEach(({ resident: r }) => {
     const job = r.pekerjaan?.trim() || 'Lainnya / Tidak Disebutkan';
     occupationMap[job] = (occupationMap[job] || 0) + 1;
   });
   const sortedJobs = Object.entries(occupationMap)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 7);
+    .slice(0, 8);
+
+  // Income Distribution for Employed Residents
+  const incomeMap: Record<string, number> = {
+    '< Rp 3.000.000 (< 3 Juta)': 0,
+    'Rp 3.000.000 - Rp 5.000.000 (3 - 5 Juta)': 0,
+    'Rp 5.000.000 - Rp 10.000.000 (5 - 10 Juta)': 0,
+    'Rp 10.000.000 - Rp 20.000.000 (10 - 20 Juta)': 0,
+    '> Rp 20.000.000 (> 20 Juta)': 0,
+    'Penghasilan Tidak Tetap / Harian': 0,
+    'Belum Terdata / Lainnya': 0
+  };
+
+  employedResidents.forEach(({ resident: r }) => {
+    const inc = r.penghasilan?.trim();
+    if (!inc || inc === 'Tidak Ada Penghasilan') {
+      incomeMap['Belum Terdata / Lainnya']++;
+    } else if (incomeMap[inc] !== undefined) {
+      incomeMap[inc]++;
+    } else {
+      if (inc.includes('< 3') || inc.includes('< Rp 3')) incomeMap['< Rp 3.000.000 (< 3 Juta)']++;
+      else if (inc.includes('3 - 5') || inc.includes('3.000.000 - Rp 5')) incomeMap['Rp 3.000.000 - Rp 5.000.000 (3 - 5 Juta)']++;
+      else if (inc.includes('5 - 10') || inc.includes('5.000.000 - Rp 10')) incomeMap['Rp 5.000.000 - Rp 10.000.000 (5 - 10 Juta)']++;
+      else if (inc.includes('10 - 20') || inc.includes('10.000.000 - Rp 20')) incomeMap['Rp 10.000.000 - Rp 20.000.000 (10 - 20 Juta)']++;
+      else if (inc.includes('> 20') || inc.includes('> Rp 20')) incomeMap['> Rp 20.000.000 (> 20 Juta)']++;
+      else if (inc.includes('Tidak Tetap') || inc.includes('Harian')) incomeMap['Penghasilan Tidak Tetap / Harian']++;
+      else incomeMap['Belum Terdata / Lainnya']++;
+    }
+  });
+
+  // Klasifikasi Sektor Pekerjaan
+  const sektorMap: Record<string, { count: number; color: string; iconName: string }> = {
+    'Swasta / Industri': { count: 0, color: 'bg-blue-600', iconName: 'Building2' },
+    'Pemerintahan / ASN / TNI / Polri': { count: 0, color: 'bg-emerald-600', iconName: 'Landmark' },
+    'Wirausaha & Pedagang': { count: 0, color: 'bg-amber-600', iconName: 'Coins' },
+    'Profesional & IT Freelancer': { count: 0, color: 'bg-indigo-600', iconName: 'TrendingUp' },
+    'Pendidikan & Kesehatan': { count: 0, color: 'bg-teal-600', iconName: 'Heart' },
+    'Transportasi & Logistik': { count: 0, color: 'bg-orange-600', iconName: 'Truck' },
+    'Buruh & Tenaga Lapangan': { count: 0, color: 'bg-rose-600', iconName: 'Users' },
+    'Lainnya / Mandiri': { count: 0, color: 'bg-slate-500', iconName: 'Briefcase' }
+  };
+
+  employedResidents.forEach(({ resident: r }) => {
+    const p = (r.pekerjaan || '').toLowerCase();
+    if (p.includes('swasta') || p.includes('pabrik') || p.includes('korporat') || p.includes('perusahaan')) {
+      sektorMap['Swasta / Industri'].count++;
+    } else if (p.includes('pns') || p.includes('asn') || p.includes('tni') || p.includes('polri') || p.includes('bumn') || p.includes('bumd')) {
+      sektorMap['Pemerintahan / ASN / TNI / Polri'].count++;
+    } else if (p.includes('wirausaha') || p.includes('pengusaha') || p.includes('pedagang') || p.includes('toko') || p.includes('warung') || p.includes('bisnis')) {
+      sektorMap['Wirausaha & Pedagang'].count++;
+    } else if (p.includes('profesional') || p.includes('konsultan') || p.includes('it') || p.includes('freelance') || p.includes('programmer') || p.includes('desainer')) {
+      sektorMap['Profesional & IT Freelancer'].count++;
+    } else if (p.includes('guru') || p.includes('dosen') || p.includes('dokter') || p.includes('perawat') || p.includes('bidan') || p.includes('medis')) {
+      sektorMap['Pendidikan & Kesehatan'].count++;
+    } else if (p.includes('driver') || p.includes('ojek') || p.includes('kurir') || p.includes('logistik') || p.includes('supir')) {
+      sektorMap['Transportasi & Logistik'].count++;
+    } else if (p.includes('buruh') || p.includes('konstruksi') || p.includes('bangunan') || p.includes('tukang') || p.includes('harian')) {
+      sektorMap['Buruh & Tenaga Lapangan'].count++;
+    } else {
+      sektorMap['Lainnya / Mandiri'].count++;
+    }
+  });
 
   // Education Breakdown
   const pendidikanMap: Record<string, number> = {};
@@ -573,7 +665,112 @@ export const DemographicsStats: React.FC<DemographicsStatsProps> = ({
             </div>
           </div>
 
-          {/* 3.3 Top Professions */}
+          {/* 3.3 Distribusi Rentang Penghasilan Warga Bekerja */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 md:col-span-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                  <DollarSign className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                    Distribusi Penghasilan Warga Bekerja ({totalBekerja} Jiwa)
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Statistik rentang pendapatan bulanan warga produktif yang berprofesi di Blok D
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 font-bold rounded-lg border border-emerald-200 flex items-center gap-1">
+                  <Briefcase className="w-3.5 h-3.5 text-emerald-600" />
+                  {totalBekerja} Warga Bekerja ({pctBekerja}%)
+                </span>
+                <span className="px-2.5 py-1 bg-slate-100 text-slate-700 font-medium rounded-lg border border-slate-200">
+                  {totalTidakBekerja} Non-Bekerja / Pelajar / IRT ({pctTidakBekerja}%)
+                </span>
+              </div>
+            </div>
+
+            {totalBekerja === 0 ? (
+              <div className="text-center py-6 text-xs text-slate-400">
+                Belum ada data warga dengan status bekerja.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Bar Chart Penghasilan */}
+                <div className="space-y-2.5 text-xs">
+                  <div className="font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>Rentang Penghasilan Bulanan:</span>
+                    <span className="text-[11px] text-slate-400 font-normal">Proporsi dari warga bekerja</span>
+                  </div>
+
+                  {Object.entries(incomeMap).map(([rentang, count], idx) => {
+                    const pct = totalBekerja > 0 ? Math.round((count / totalBekerja) * 100) : 0;
+                    const colors = [
+                      'bg-rose-500',
+                      'bg-emerald-500',
+                      'bg-teal-600',
+                      'bg-blue-600',
+                      'bg-purple-600',
+                      'bg-amber-500',
+                      'bg-slate-400'
+                    ];
+                    const barColor = colors[idx % colors.length];
+
+                    return (
+                      <div key={rentang} className="p-2 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                        <div className="flex justify-between font-semibold text-slate-800">
+                          <span className="truncate max-w-[210px] sm:max-w-xs">{rentang}</span>
+                          <span className="font-mono text-emerald-800 font-bold">
+                            {count} Orang <span className="text-slate-500 font-normal">({pct}%)</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div
+                            className={`${barColor} h-full rounded-full transition-all duration-500`}
+                            style={{ width: `${Math.max(2, pct)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Sektor Lapangan Usaha & Klasifikasi */}
+                <div className="space-y-2.5 text-xs">
+                  <div className="font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>Sektor Usaha &amp; Lapangan Kerja:</span>
+                    <span className="text-[11px] text-slate-400 font-normal">Kategori Bidang</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {Object.entries(sektorMap).map(([sektor, data]) => {
+                      const pct = totalBekerja > 0 ? Math.round((data.count / totalBekerja) * 100) : 0;
+                      return (
+                        <div key={sektor} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <span className="text-[11px] font-bold text-slate-800 line-clamp-1">{sektor}</span>
+                            <div className="text-[10px] text-slate-500">{pct}% angkatan kerja</div>
+                          </div>
+                          <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200 text-xs">
+                            {data.count}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="p-3 bg-emerald-50/70 rounded-xl border border-emerald-200 text-[11px] text-emerald-900">
+                    💡 <strong>Insight Ekonomi:</strong> Mayoritas warga Blok D berada pada rentang UMR / Menengah, mendukung ketahanan finansial iuran lingkungan dan kegiatan sosial paguyuban.
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3.4 Top Professions */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-blue-600" />
@@ -598,7 +795,7 @@ export const DemographicsStats: React.FC<DemographicsStatsProps> = ({
             </div>
           </div>
 
-          {/* 3.4 BPJS Healthcare Coverage */}
+          {/* 3.5 BPJS Healthcare Coverage */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-blue-600" />

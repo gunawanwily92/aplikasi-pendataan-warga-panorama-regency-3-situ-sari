@@ -33,7 +33,12 @@ import {
   PhoneCall,
   Info,
   Clock,
-  Shield
+  Shield,
+  Briefcase,
+  DollarSign,
+  Coins,
+  Wallet,
+  TrendingUp
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -150,6 +155,61 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
   });
   const sortedGolDarah = Object.entries(golDarahMap);
+
+  // ========================================================
+  // STATISTIK PEKERJAAN & PENGHASILAN WARGA
+  // ========================================================
+  const isResidentWorking = (pekerjaan?: string) => {
+    const p = (pekerjaan || '').trim().toLowerCase();
+    if (!p) return false;
+    if (
+      p.includes('belum') ||
+      p.includes('tidak bekerja') ||
+      p.includes('pelajar') ||
+      p.includes('mahasiswa') ||
+      p.includes('irt') ||
+      p.includes('ibu rumah tangga') ||
+      p.includes('pensiun') ||
+      p.includes('balita') ||
+      p.includes('anak')
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  const employedResidents = allResidents.filter(({ resident: r }) => isResidentWorking(r.pekerjaan));
+  const totalBekerja = employedResidents.length;
+  const pctBekerja = totalJiwa > 0 ? Math.round((totalBekerja / totalJiwa) * 100) : 0;
+
+  // Income summary for quick dashboard card
+  const incomeSummaryMap: Record<string, number> = {
+    '< 3 Jt': 0,
+    '3 - 5 Jt (UMR)': 0,
+    '5 - 10 Jt': 0,
+    '10 - 20 Jt': 0,
+    '> 20 Jt': 0,
+    'Tidak Tetap': 0
+  };
+
+  employedResidents.forEach(({ resident: r }) => {
+    const inc = r.penghasilan?.trim() || '';
+    if (inc.includes('< 3') || inc.includes('< Rp 3')) incomeSummaryMap['< 3 Jt']++;
+    else if (inc.includes('3 - 5') || inc.includes('3.000.000 - Rp 5')) incomeSummaryMap['3 - 5 Jt (UMR)']++;
+    else if (inc.includes('5 - 10') || inc.includes('5.000.000 - Rp 10')) incomeSummaryMap['5 - 10 Jt']++;
+    else if (inc.includes('10 - 20') || inc.includes('10.000.000 - Rp 20')) incomeSummaryMap['10 - 20 Jt']++;
+    else if (inc.includes('> 20') || inc.includes('> Rp 20')) incomeSummaryMap['> 20 Jt']++;
+    else if (inc.includes('Tidak Tetap') || inc.includes('Harian')) incomeSummaryMap['Tidak Tetap']++;
+    else incomeSummaryMap['3 - 5 Jt (UMR)']++;
+  });
+
+  // Top Occupations
+  const occupationMap: Record<string, number> = {};
+  allResidents.forEach(({ resident: r }) => {
+    const job = r.pekerjaan?.trim() || 'Lainnya';
+    occupationMap[job] = (occupationMap[job] || 0) + 1;
+  });
+  const topJobs = Object.entries(occupationMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   // ========================================================
   // STATISTIK & GRAFIK MUTASI (WARGA PINDAH & MENINGGAL)
@@ -423,25 +483,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700/70 space-y-2.5">
             <div className="font-bold text-emerald-300 flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Siskamling & Ronda Malam Minggu</span>
+              <span>Siskamling & Ronda Sabtu (7 Petugas)</span>
             </div>
             <p className="text-[11px] text-slate-300 leading-relaxed">
-              Kegiatan siskamling ronda malam warga berlangsung di Pos Kamling Utama Blok D pukul 22.00 s/d 04.00 WIB.
+              Jadwal siskamling rutin <strong className="text-amber-300">hanya setiap hari Sabtu / malam Minggu</strong> (22.00 - 04.00 WIB) dengan kuota 7 orang petugas per regu piket.
             </p>
-            {new Date().getDay() === 6 ? (
-              <button
-                onClick={() => onNavigateTab('ronda')}
-                className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer pt-1"
-              >
-                <span>🚨 Buka Jadwal & Presensi Ronda Malam Ini</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            ) : (
-              <div className="text-[11px] text-slate-400 pt-1 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
-                <span>Menu Ronda Aktif Khusus Hari Sabtu</span>
-              </div>
-            )}
+            <button
+              onClick={() => onNavigateTab('ronda')}
+              className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer pt-1"
+            >
+              <span>Lihat Jadwal Ronda Sabtu & Presensi</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
 
           {/* Card 3: Pelaporan Warga Baru / Pindah */}
@@ -678,6 +731,105 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Ringkasan Profil Lapangan Kerja & Rentang Penghasilan Warga */}
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm sm:text-base text-slate-900">
+                Ringkasan Lapangan Kerja &amp; Penghasilan Warga Bekerja
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Karakteristik sosio-ekonomi dan sebaran pendapatan warga produktif di Blok D
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 font-bold text-xs rounded-xl border border-emerald-200 flex items-center gap-1">
+              <Briefcase className="w-3.5 h-3.5 text-emerald-600" />
+              {totalBekerja} Warga Bekerja ({pctBekerja}%)
+            </span>
+            <button
+              onClick={() => onNavigateTab('statistik')}
+              className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
+            >
+              <span>Demografi Lengkap</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Sebaran Penghasilan */}
+          <div className="space-y-2.5">
+            <div className="text-xs font-bold text-slate-700 flex items-center justify-between">
+              <span>Rentang Penghasilan Bulanan:</span>
+              <span className="text-[11px] text-slate-400 font-normal">{totalBekerja} Warga Produktif</span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+              {Object.entries(incomeSummaryMap).map(([rentang, count]) => {
+                const pct = totalBekerja > 0 ? Math.round((count / totalBekerja) * 100) : 0;
+                return (
+                  <div
+                    key={rentang}
+                    className="p-2.5 bg-slate-50 hover:bg-emerald-50/40 border border-slate-200 hover:border-emerald-200 rounded-xl transition-all"
+                  >
+                    <div className="text-[11px] font-bold text-slate-700 truncate">{rentang}</div>
+                    <div className="text-base sm:text-lg font-black font-mono text-emerald-800 mt-0.5">
+                      {count} <span className="text-[10px] font-semibold text-slate-500">({pct}%)</span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-1 mt-1.5 overflow-hidden">
+                      <div
+                        className="bg-emerald-500 h-full rounded-full"
+                        style={{ width: `${Math.max(4, pct)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Top Profesi / Pekerjaan */}
+          <div className="space-y-2.5">
+            <div className="text-xs font-bold text-slate-700 flex items-center justify-between">
+              <span>5 Profesi / Bidang Terbanyak:</span>
+              <span className="text-[11px] text-slate-400 font-normal">Dari {totalJiwa} Total Jiwa</span>
+            </div>
+
+            <div className="space-y-1.5 text-xs">
+              {topJobs.length === 0 ? (
+                <div className="text-slate-400 italic py-4 text-center">Belum ada data profesi</div>
+              ) : (
+                topJobs.map(([job, count], idx) => {
+                  const pct = totalJiwa > 0 ? Math.round((count / totalJiwa) * 100) : 0;
+                  const barColors = ['bg-emerald-600', 'bg-blue-600', 'bg-indigo-600', 'bg-teal-600', 'bg-slate-500'];
+                  return (
+                    <div key={job} className="p-2 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                      <div className="flex justify-between font-semibold text-slate-800">
+                        <span className="truncate">{job}</span>
+                        <span className="font-mono text-slate-900 font-bold">{count} Orang ({pct}%)</span>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`${barColors[idx % barColors.length]} h-full rounded-full transition-all duration-500`}
+                          style={{ width: `${Math.max(4, pct)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

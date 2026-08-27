@@ -131,12 +131,20 @@ export function subscribeRonda(
     (snapshot) => {
       const items: RondaSchedule[] = [];
       snapshot.forEach((docSnap) => {
-        items.push(docSnap.data() as RondaSchedule);
+        const data = docSnap.data() as RondaSchedule;
+        items.push({
+          ...data,
+          id: docSnap.id
+        });
       });
       if (items.length > 0) {
-        // Urutkan hari Senin s/d Minggu
-        const daysOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-        items.sort((a, b) => daysOrder.indexOf(a.hari) - daysOrder.indexOf(b.hari));
+        // Urutkan berdasarkan pekan (1..5) atau hari
+        items.sort((a, b) => {
+          if (a.pekan && b.pekan) return a.pekan - b.pekan;
+          const hariA = (a && a.hari) ? String(a.hari) : '';
+          const hariB = (b && b.hari) ? String(b.hari) : '';
+          return hariA.localeCompare(hariB);
+        });
         onData(items);
       }
     },
@@ -151,11 +159,28 @@ export function subscribeRonda(
  * Menyimpan seluruh jadwal ronda ke Firestore
  */
 export async function saveRondaToFirestore(schedules: RondaSchedule[]): Promise<void> {
+  const snapshot = await getDocs(collection(db, RONDA_COLL));
   const batch = writeBatch(db);
-  for (const item of schedules) {
-    const docRef = doc(db, RONDA_COLL, item.hari);
-    batch.set(docRef, item, { merge: true });
-  }
+
+  // Bersihkan dokumen lama yang mungkin format hari kerja (Senin..Jumat)
+  const targetDocIds = new Set<string>();
+  schedules.forEach((item, idx) => {
+    const docId = item.id || `sabtu_pekan_${item.pekan || idx + 1}`;
+    targetDocIds.add(docId);
+  });
+
+  snapshot.forEach((docSnap) => {
+    if (!targetDocIds.has(docSnap.id)) {
+      batch.delete(docSnap.ref);
+    }
+  });
+
+  schedules.forEach((item, idx) => {
+    const docId = item.id || `sabtu_pekan_${item.pekan || idx + 1}`;
+    const docRef = doc(db, RONDA_COLL, docId);
+    batch.set(docRef, { ...item, id: docId, pekan: item.pekan || idx + 1 }, { merge: true });
+  });
+
   await batch.commit();
 }
 

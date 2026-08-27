@@ -17,6 +17,36 @@ export type EducationLevel =
   | 'Doktor (S3)'
   | 'Lainnya / Non-Formal';
 
+export const PEKERJAAN_OPTIONS = [
+  'Karyawan Swasta',
+  'Pegawai Negeri Sipil (PNS / ASN)',
+  'TNI / Polri',
+  'Karyawan BUMN / BUMD',
+  'Wiraswasta / Pedagang / Pengusaha',
+  'Profesional / Konsultan / IT / Freelancer',
+  'Guru / Dosen / Tenaga Pendidik',
+  'Tenaga Kesehatan / Medis (Dokter/Perawat/Bidan)',
+  'Driver / Ojek Online / Kurir / Logistik',
+  'Buruh Pabrik / Konstruksi / Harian',
+  'Ibu Rumah Tangga (IRT)',
+  'Pelajar / Mahasiswa',
+  'Belum / Tidak Bekerja',
+  'Pensiunan / Purnawirawan',
+  'Lainnya (Ketik Manual)'
+] as const;
+
+export const PENGHASILAN_OPTIONS = [
+  '< Rp 3.000.000 (< 3 Juta)',
+  'Rp 3.000.000 - Rp 5.000.000 (3 - 5 Juta)',
+  'Rp 5.000.000 - Rp 10.000.000 (5 - 10 Juta)',
+  'Rp 10.000.000 - Rp 20.000.000 (10 - 20 Juta)',
+  '> Rp 20.000.000 (> 20 Juta)',
+  'Penghasilan Tidak Tetap / Harian',
+  'Tidak Ada Penghasilan'
+] as const;
+
+export type IncomeRange = typeof PENGHASILAN_OPTIONS[number];
+
 export interface Resident {
   id: string;
   nik: string;
@@ -28,6 +58,7 @@ export interface Resident {
   statusKawin: MaritalStatus;
   pendidikan: EducationLevel | string;
   pekerjaan: string;
+  penghasilan?: string; // Rentang penghasilan bulanan jika warga bekerja
   noHp: string;
   golonganDarah: string;
   hubunganKeluarga: FamilyRole;
@@ -104,12 +135,16 @@ export interface HouseUnit {
 }
 
 export interface RondaSchedule {
-  hari: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu' | 'Minggu';
+  id?: string;
+  hari: string; // e.g. 'Sabtu Pekan 1 (Malam Minggu)', 'Sabtu Pekan 2 (Malam Minggu)', etc.
+  pekan?: number; // 1, 2, 3, 4, 5
+  tanggal?: string; // YYYY-MM-DD
   ketuaRegu: string;
-  petugas: { nama: string; blok: string; noHp: string }[];
+  petugas: { nama: string; blok: string; noHp: string; nomorRumah?: string }[]; // 7 orang per Sabtu
   posJaga: string;
   jamMulai: string;
   jamSelesai: string;
+  catatan?: string;
 }
 
 export interface MovedCitizen {

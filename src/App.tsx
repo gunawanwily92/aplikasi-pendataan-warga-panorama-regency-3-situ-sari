@@ -54,7 +54,7 @@ import { ExportPrintModal } from './components/ExportPrintModal';
 import { CensusFormModal } from './components/CensusFormModal';
 import { CitizenCardModal } from './components/CitizenCardModal';
 import { LoginScreen } from './components/LoginScreen';
-import { RondaSaturdayView } from './components/RondaSaturdayView';
+import { RondaModule } from './components/RondaModule';
 import { Home, Users, BarChart3, PlusCircle, LogOut, AlertTriangle, Building2, ShieldCheck, FileSpreadsheet, Truck, HeartCrack, FileText, BookOpen, Shield } from 'lucide-react';
 
 export default function App() {
@@ -83,16 +83,14 @@ export default function App() {
   const isGuest = currentUser?.isGuest || currentUser?.role === 'warga';
   const isSaturday = new Date().getDay() === 6;
 
-  // Proteksi: Jika user adalah Warga dan mencoba membuka tab di luar Ringkasan (atau Ronda jika Sabtu), arahkan ke dashboard
+  // Proteksi: Jika user adalah Warga dan mencoba membuka tab di luar Ringkasan dan Ronda, arahkan ke dashboard
   useEffect(() => {
     if (isGuest) {
-      if (activeTab === 'ronda' && isSaturday) {
-        // diperbolehkan
-      } else if (activeTab !== 'dashboard') {
+      if (activeTab !== 'dashboard' && activeTab !== 'ronda') {
         setActiveTab('dashboard');
       }
     }
-  }, [isGuest, isSaturday, activeTab]);
+  }, [isGuest, activeTab]);
 
   // Modals state
   const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
@@ -314,7 +312,7 @@ export default function App() {
     deleteCoverLetterFromFirestore(letterId).catch(console.error);
   };
 
-  // Handlers for Presensi Ronda Sabtu
+  // Handlers for Presensi & Jadwal Ronda Siskamling
   const handleAddRondaAttendance = (attendance: RondaAttendance) => {
     setRondaAttendances((prev) => [attendance, ...prev]);
     saveRondaAttendanceToFirestore(attendance).catch(console.error);
@@ -323,6 +321,12 @@ export default function App() {
   const handleDeleteRondaAttendance = (id: string) => {
     setRondaAttendances((prev) => prev.filter((a) => a.id !== id));
     deleteRondaAttendanceFromFirestore(id).catch(console.error);
+  };
+
+  const handleUpdateRondaSchedule = (schedules: RondaSchedule[]) => {
+    setRondaSchedule(schedules);
+    saveRondaToStorage(schedules);
+    saveRondaToFirestore(schedules).catch(console.error);
   };
 
   const handleImportData = (
@@ -400,10 +404,7 @@ export default function App() {
             currentUser={currentUser}
             onOpenAddModal={handleOpenAdd}
             onNavigateTab={(tab) => {
-              if (isGuest && tab !== 'dashboard') {
-                if (tab === 'ronda' && isSaturday) {
-                  setActiveTab('ronda');
-                }
+              if (isGuest && tab !== 'dashboard' && tab !== 'ronda') {
                 return;
               }
               setActiveTab(tab);
@@ -417,14 +418,16 @@ export default function App() {
           />
         )}
 
-        {/* Tab Ronda Khusus Hari Sabtu */}
+        {/* Tab Ronda & Siskamling Terpadu Blok D */}
         {activeTab === 'ronda' && (
-          <RondaSaturdayView
+          <RondaModule
             currentUser={currentUser}
             houses={houses}
+            rondaSchedule={rondaSchedule}
             attendances={rondaAttendances}
             onAddAttendance={handleAddRondaAttendance}
             onDeleteAttendance={handleDeleteRondaAttendance}
+            onUpdateSchedule={handleUpdateRondaSchedule}
           />
         )}
 
@@ -539,17 +542,15 @@ export default function App() {
           <span className="text-[9px]">Ringkasan</span>
         </button>
 
-        {isSaturday && (
-          <button
-            onClick={() => setActiveTab('ronda')}
-            className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
-              activeTab === 'ronda' ? 'text-emerald-600 font-bold' : 'text-slate-500 font-medium'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span className="text-[9px]">Ronda (Sabtu)</span>
-          </button>
-        )}
+        <button
+          onClick={() => setActiveTab('ronda')}
+          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all shrink-0 ${
+            activeTab === 'ronda' ? 'text-emerald-600 font-bold' : 'text-slate-500 font-medium'
+          }`}
+        >
+          <Shield className="w-4 h-4" />
+          <span className="text-[9px]">Ronda (Sabtu)</span>
+        </button>
 
         {!isGuest ? (
           <>

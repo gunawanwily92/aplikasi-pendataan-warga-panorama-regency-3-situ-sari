@@ -31,35 +31,31 @@ export const Header: React.FC<HeaderProps> = ({
   const totalJiwa = allResidents.length;
 
   const isGuest = currentUser?.isGuest || currentUser?.role === 'warga';
-  // Menu ronda hanya ditampilkan pada hari Sabtu (getDay() === 6: 0 = Minggu, 6 = Sabtu)
   const isSaturday = new Date().getDay() === 6;
 
-  // Bangun daftar menu navigasi sesuai peran & hari
+  // Bangun daftar menu navigasi sesuai peran
   type NavItem = { id: ActiveTab; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string };
   const navItems: NavItem[] = [];
 
   if (isGuest) {
-    // Khusus Warga: Hanya bisa melihat Ringkasan (dan Jadwal Ronda hanya jika hari Sabtu)
-    navItems.push({ id: 'dashboard', label: 'Ringkasan', icon: Home });
-    if (isSaturday) {
-      navItems.push({ id: 'ronda', label: 'Jadwal Ronda (Sabtu)', icon: Shield, badge: 'Malam Ini' });
-    }
+    // Khusus Warga: Ringkasan dan Modul Ronda Siskamling
+    navItems.push(
+      { id: 'dashboard', label: 'Ringkasan', icon: Home },
+      { id: 'ronda', label: 'Siskamling & Ronda', icon: Shield, badge: isSaturday ? 'Sabtu' : 'Aktif' }
+    );
   } else {
-    // Pengurus RT: Akses penuh administrasi
+    // Pengurus RT: Akses penuh administrasi + Modul Ronda
     navItems.push(
       { id: 'dashboard', label: 'Ringkasan', icon: Home },
       { id: 'warga', label: 'Data Warga', icon: Users },
       { id: 'pengantar', label: 'Surat Pengantar', icon: FileText },
+      { id: 'ronda', label: 'Siskamling & Ronda', icon: Shield, badge: isSaturday ? 'Sabtu' : 'Aktif' },
       { id: 'pindah', label: 'Warga Pindah', icon: Truck },
       { id: 'meninggal', label: 'Warga Meninggal', icon: HeartCrack },
       { id: 'agenda', label: 'Agenda Surat', icon: BookOpen },
       { id: 'statistik', label: 'Demografi', icon: BarChart3 },
       { id: 'ekspor', label: 'Cetak & Ekspor', icon: Download },
     );
-    // Menu ronda hanya pada hari Sabtu
-    if (isSaturday) {
-      navItems.push({ id: 'ronda', label: 'Jadwal Ronda (Sabtu)', icon: Shield, badge: 'Sabtu' });
-    }
   }
 
   return (

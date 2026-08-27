@@ -11,6 +11,11 @@ service cloud.firestore {
       allow read, write: if true;
     }
     
+    // Koleksi presensi kehadiran ronda malam
+    match /ronda_attendance/{attendanceId} {
+      allow read, write: if true;
+    }
+    
     // Koleksi catatan mutasi warga pindah
     match /moved_citizens/{citizenId} {
       allow read, write: if true;

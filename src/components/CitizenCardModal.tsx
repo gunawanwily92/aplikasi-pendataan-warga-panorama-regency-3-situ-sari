@@ -173,7 +173,14 @@ export const CitizenCardModal: React.FC<CitizenCardModalProps> = ({ house, onClo
                         <td className="p-2 sm:p-2.5 print:p-1">{r.jenisKelamin}</td>
                         <td className="p-2 sm:p-2.5 print:p-1 font-semibold text-blue-700">{r.hubunganKeluarga}</td>
                         <td className="p-2 sm:p-2.5 print:p-1 text-[11px] print:text-[10px] text-slate-700 font-medium">{r.pendidikan || '-'}</td>
-                        <td className="p-2 sm:p-2.5 print:p-1">{r.pekerjaan}</td>
+                        <td className="p-2 sm:p-2.5 print:p-1">
+                          <div className="font-medium text-slate-900">{r.pekerjaan || '-'}</div>
+                          {r.penghasilan && r.penghasilan !== 'Tidak Ada Penghasilan' && (
+                            <div className="text-[9.5px] print:text-[8.5px] font-bold text-emerald-700">
+                              {r.penghasilan}
+                            </div>
+                          )}
+                        </td>
                         <td className="p-2 sm:p-2.5 print:p-1 text-[11px] print:text-[10px]">{r.statusBpjs}</td>
                       </tr>
                     ))

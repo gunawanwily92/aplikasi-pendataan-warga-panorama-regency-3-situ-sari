@@ -34,6 +34,22 @@
       },
       "required": ["hari", "ketuaRegu", "posJaga", "petugas"]
     },
+    "RondaAttendance": {
+      "title": "RondaAttendance",
+      "description": "Data presensi kehadiran ronda malam warga siskamling Blok D",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tanggal": { "type": "string" },
+        "nama": { "type": "string" },
+        "nomorRumah": { "type": "string" },
+        "jamMasuk": { "type": "string" },
+        "status": { "type": "string" },
+        "keterangan": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "tanggal", "nama", "nomorRumah", "jamMasuk"]
+    },
     "MovedCitizen": {
       "title": "MovedCitizen",
       "description": "Catatan mutasi warga pindah domisili keluar",
@@ -82,6 +98,10 @@
     "ronda_schedules": {
       "entity": "RondaSchedule",
       "description": "Koleksi jadwal siskamling ronda perumahan"
+    },
+    "ronda_attendance": {
+      "entity": "RondaAttendance",
+      "description": "Koleksi data presensi kehadiran ronda malam warga siskamling Blok D"
     },
     "moved_citizens": {
       "entity": "MovedCitizen",

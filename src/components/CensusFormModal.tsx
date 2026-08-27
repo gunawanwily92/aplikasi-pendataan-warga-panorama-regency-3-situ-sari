@@ -1,15 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { HouseUnit, Resident, Vehicle, HouseOccupancyStatus, Gender, FamilyRole, Religion, MaritalStatus, AuthUser, WifiProvider } from '../types/census';
+import { HouseUnit, Resident, Vehicle, HouseOccupancyStatus, Gender, FamilyRole, Religion, MaritalStatus, AuthUser, WifiProvider, PEKERJAAN_OPTIONS, PENGHASILAN_OPTIONS } from '../types/census';
 import { calculateAge } from '../utils/censusHelpers';
 import { 
   MASTER_HOUSE_NUMBERS, 
   BLOK_TOTAL_UNITS, 
   isValidMasterHouse, 
   formatHouseNumber, 
-  BlokName,
+  BlokName, 
   TOTAL_OFFICIAL_HOUSES
 } from '../data/masterHouseList';
-import { X, Plus, Trash2, Home, Users, Car, Phone, CheckCircle2, UserPlus, AlertCircle, Check, HelpCircle, ChevronDown, ChevronUp, MapPin, Wifi } from 'lucide-react';
+import { X, Plus, Trash2, Home, Users, Car, Phone, CheckCircle2, UserPlus, AlertCircle, Check, HelpCircle, ChevronDown, ChevronUp, MapPin, Wifi, Briefcase, DollarSign, Coins } from 'lucide-react';
+
+// Helper untuk mengecek apakah warga termasuk kategori berpenghasilan / bekerja aktif
+export function isResidentEmployed(pekerjaan: string): boolean {
+  const p = (pekerjaan || '').trim().toLowerCase();
+  if (!p) return false;
+  if (
+    p.includes('belum') ||
+    p.includes('tidak bekerja') ||
+    p.includes('pelajar') ||
+    p.includes('mahasiswa') ||
+    p.includes('irt') ||
+    p.includes('ibu rumah tangga') ||
+    p.includes('pensiun') ||
+    p.includes('balita') ||
+    p.includes('anak')
+  ) {
+    return false;
+  }
+  return true;
+}
 
 interface CensusFormModalProps {
   isOpen: boolean;
@@ -154,6 +174,7 @@ export const CensusFormModal: React.FC<CensusFormModalProps> = ({
           statusKawin: 'Kawin',
           pendidikan: 'SMA / SMK / Sederajat',
           pekerjaan: '',
+          penghasilan: '',
           noHp: '',
           golonganDarah: '-',
           hubunganKeluarga: 'Kepala Keluarga',
@@ -229,6 +250,7 @@ export const CensusFormModal: React.FC<CensusFormModalProps> = ({
       statusKawin: residents.length === 1 ? 'Kawin' : 'Belum Kawin',
       pendidikan: 'SMA / SMK / Sederajat',
       pekerjaan: '',
+      penghasilan: '',
       noHp: '',
       golonganDarah: '-',
       hubunganKeluarga: residents.length === 1 ? 'Istri' : 'Anak',
@@ -252,6 +274,15 @@ export const CensusFormModal: React.FC<CensusFormModalProps> = ({
         target.alamatKtpLuar = '';
       } else if (age !== null && age >= 17 && (!target.statusKtp || target.statusKtp === '')) {
         target.statusKtp = 'KTP Blok D (Sesuai Alamat)';
+      }
+    }
+
+    // Jika pekerjaan diubah ke non-bekerja (IRT, Pelajar, Belum Bekerja, Pensiun), reset penghasilan
+    if (field === 'pekerjaan') {
+      if (!isResidentEmployed(value)) {
+        target.penghasilan = 'Tidak Ada Penghasilan';
+      } else if (!target.penghasilan || target.penghasilan === 'Tidak Ada Penghasilan') {
+        target.penghasilan = 'Rp 3.000.000 - Rp 5.000.000 (3 - 5 Juta)';
       }
     }
 
@@ -1241,19 +1272,107 @@ export const CensusFormModal: React.FC<CensusFormModalProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                            Pekerjaan: <span className="text-rose-600 font-bold">* (Wajib)</span>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-0.5 flex items-center justify-between">
+                            <span>Pekerjaan: <span className="text-rose-600 font-bold">* (Wajib)</span></span>
                           </label>
-                          <input
-                            type="text"
+                          <select
+                            value={
+                              PEKERJAAN_OPTIONS.includes(res.pekerjaan as any)
+                                ? res.pekerjaan
+                                : res.pekerjaan
+                                ? 'Lainnya (Ketik Manual)'
+                                : ''
+                            }
                             required
-                            value={res.pekerjaan}
-                            onChange={(e) => handleUpdateResident(idx, 'pekerjaan', e.target.value)}
-                            placeholder="Karyawan, Guru, Wiraswasta, IRT, Pelajar..."
-                            className="w-full p-2 bg-white border border-slate-300 rounded-xl"
-                          />
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === 'Lainnya (Ketik Manual)') {
+                                handleUpdateResident(idx, 'pekerjaan', res.pekerjaan && !PEKERJAAN_OPTIONS.includes(res.pekerjaan as any) ? res.pekerjaan : '');
+                              } else {
+                                handleUpdateResident(idx, 'pekerjaan', val);
+                              }
+                            }}
+                            className="w-full p-2 bg-white border border-slate-300 rounded-xl text-slate-900 font-medium"
+                          >
+                            <option value="">-- Pilih Kategori / Kriteria Pekerjaan --</option>
+                            {PEKERJAAN_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* Jika memilih Lainnya atau mengisi profesi kustom */}
+                          {(res.pekerjaan === 'Lainnya (Ketik Manual)' || (!PEKERJAAN_OPTIONS.includes(res.pekerjaan as any) && res.pekerjaan !== '')) && (
+                            <input
+                              type="text"
+                              required
+                              value={res.pekerjaan === 'Lainnya (Ketik Manual)' ? '' : res.pekerjaan}
+                              onChange={(e) => handleUpdateResident(idx, 'pekerjaan', e.target.value)}
+                              placeholder="Ketik nama profesi / pekerjaan spesifik..."
+                              className="w-full mt-1.5 p-2 bg-amber-50/60 border border-amber-300 rounded-xl text-slate-900 placeholder:text-slate-400 text-xs focus:bg-white"
+                            />
+                          )}
                         </div>
                       </div>
+
+                      {/* Line 3.5: Input Penghasilan Bulanan (Hanya Muncul Jika Warga Bekerja) */}
+                      {isResidentEmployed(res.pekerjaan) && (
+                        <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50/60 rounded-xl border border-emerald-200/80 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                              <DollarSign className="w-4 h-4 text-emerald-600 shrink-0" />
+                              <span>Penghasilan Bulanan (Warga Bekerja):</span>
+                              <span className="text-emerald-700 text-[10px] font-normal">(Kriteria Ekonomi)</span>
+                            </label>
+                            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-300">
+                              Warga Produktif Bekerja
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <select
+                              value={res.penghasilan || 'Rp 3.000.000 - Rp 5.000.000 (3 - 5 Juta)'}
+                              onChange={(e) => handleUpdateResident(idx, 'penghasilan', e.target.value)}
+                              className="w-full p-2 bg-white border border-emerald-300 rounded-xl text-slate-900 text-xs font-medium focus:ring-2 focus:ring-emerald-400 outline-none"
+                            >
+                              {PENGHASILAN_OPTIONS.map((pOpt) => (
+                                <option key={pOpt} value={pOpt}>
+                                  {pOpt}
+                                </option>
+                              ))}
+                            </select>
+
+                            {/* Quick Chips untuk Pemilihan Cepat */}
+                            <div className="flex flex-wrap gap-1 items-center">
+                              {[
+                                { label: '< 3 Jt', val: '< Rp 3.000.000 (< 3 Juta)' },
+                                { label: '3-5 Jt (UMR)', val: 'Rp 3.000.000 - Rp 5.000.000 (3 - 5 Juta)' },
+                                { label: '5-10 Jt', val: 'Rp 5.000.000 - Rp 10.000.000 (5 - 10 Juta)' },
+                                { label: '10-20 Jt', val: 'Rp 10.000.000 - Rp 20.000.000 (10 - 20 Juta)' },
+                                { label: '> 20 Jt', val: '> Rp 20.000.000 (> 20 Juta)' },
+                                { label: 'Tidak Tetap', val: 'Penghasilan Tidak Tetap / Harian' }
+                              ].map((chip) => (
+                                <button
+                                  key={chip.val}
+                                  type="button"
+                                  onClick={() => handleUpdateResident(idx, 'penghasilan', chip.val)}
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                                    res.penghasilan === chip.val
+                                      ? 'bg-emerald-600 text-white shadow-sm'
+                                      : 'bg-white/80 hover:bg-white text-emerald-900 border border-emerald-200'
+                                  }`}
+                                >
+                                  {chip.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-emerald-800/80">
+                            * Digunakan secara anonim untuk statistik demografi, pemetaan ekonomi &amp; ketahanan sosial paguyuban Blok D.
+                          </p>
+                        </div>
+                      )}
 
                       {/* Line 4: No HP, Agama, Golongan Darah */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">

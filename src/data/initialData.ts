@@ -21,11 +21,60 @@ export function isGenericBlokD(nomorRumah?: string, id?: string): boolean {
 export const INITIAL_HOUSES: HouseUnit[] = [];
 
 export const INITIAL_RONDA_SCHEDULE: RondaSchedule[] = [
-  
+  {
+    hari: 'Sabtu Pekan 1 (Malam Minggu)',
+    pekan: 1,
+    ketuaRegu: 'Belum ditentukan',
+    petugas: [],
+    posJaga: 'Pos Kamling Utama Blok D & Patroli Gang D1-D4',
+    jamMulai: '22:00',
+    jamSelesai: '04:00',
+    catatan: 'Regu 1 Siskamling Sabtu Pekan Pertama (7 Orang)'
+  },
+  {
+    hari: 'Sabtu Pekan 2 (Malam Minggu)',
+    pekan: 2,
+    ketuaRegu: 'Belum ditentukan',
+    petugas: [],
+    posJaga: 'Pos Kamling Utama Blok D & Patroli Gang D1-D4',
+    jamMulai: '22:00',
+    jamSelesai: '04:00',
+    catatan: 'Regu 2 Siskamling Sabtu Pekan Kedua (7 Orang)'
+  },
+  {
+    hari: 'Sabtu Pekan 3 (Malam Minggu)',
+    pekan: 3,
+    ketuaRegu: 'Belum ditentukan',
+    petugas: [],
+    posJaga: 'Pos Kamling Utama Blok D & Patroli Gang D1-D4',
+    jamMulai: '22:00',
+    jamSelesai: '04:00',
+    catatan: 'Regu 3 Siskamling Sabtu Pekan Ketiga (7 Orang)'
+  },
+  {
+    hari: 'Sabtu Pekan 4 (Malam Minggu)',
+    pekan: 4,
+    ketuaRegu: 'Belum ditentukan',
+    petugas: [],
+    posJaga: 'Pos Kamling Utama Blok D & Patroli Gang D1-D4',
+    jamMulai: '22:00',
+    jamSelesai: '04:00',
+    catatan: 'Regu 4 Siskamling Sabtu Pekan Keempat (7 Orang)'
+  },
+  {
+    hari: 'Sabtu Pekan 5 (Malam Minggu)',
+    pekan: 5,
+    ketuaRegu: 'Belum ditentukan',
+    petugas: [],
+    posJaga: 'Pos Kamling Utama Blok D (Patroli Gabungan Korlap)',
+    jamMulai: '22:00',
+    jamSelesai: '04:00',
+    catatan: 'Regu 5 Gabungan untuk Bulan dengan 5 Hari Sabtu (7 Orang)'
+  }
 ];
 
 const STORAGE_KEY = 'panorama_regency3_blok_d_sensus_v1';
-const RONDA_STORAGE_KEY = 'panorama_regency3_blok_d_ronda_v1';
+const RONDA_STORAGE_KEY = 'panorama_regency3_blok_d_ronda_v3_clean';
 
 export function loadHousesFromStorage(): HouseUnit[] {
   try {
@@ -59,7 +108,11 @@ export function loadRondaFromStorage(): RondaSchedule[] {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        // Pastikan format Sabtu
+        const hasSabtu = parsed.some((p: RondaSchedule) => p && p.hari && typeof p.hari === 'string' && p.hari.toLowerCase().includes('sabtu'));
+        if (hasSabtu) {
+          return parsed;
+        }
       }
     }
   } catch (e) {
